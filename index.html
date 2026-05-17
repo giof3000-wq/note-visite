@@ -1,58 +1,143 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 
 <title>Note Visite Pro</title>
 
 <style>
 
-body{
-  font-family:Arial,sans-serif;
-  background:#f5f5f5;
+*{
+  box-sizing:border-box;
   margin:0;
-  padding:20px;
-  color:#222;
+  padding:0;
 }
 
-.container{
-  max-width:800px;
+:root{
+  --bg:#f5f4f1;
+  --surface:#ffffff;
+  --surface2:#f0efe9;
+  --border:rgba(0,0,0,0.10);
+  --border2:rgba(0,0,0,0.18);
+  --text:#1a1a18;
+  --text2:#6b6b66;
+  --accent:#1a1a18;
+  --green:#2d7a2d;
+  --red:#c0392b;
+  --radius:12px;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+header{
+  background:var(--surface);
+  padding:18px 20px;
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+header h1{
+  font-size:20px;
+}
+
+header p{
+  font-size:13px;
+  color:var(--text2);
+  margin-top:3px;
+}
+
+.content{
+  padding:20px;
+  max-width:900px;
   margin:auto;
-  background:white;
-  padding:20px;
-  border-radius:12px;
 }
 
-input, textarea, button{
+.section{
+  margin-bottom:22px;
+}
+
+label{
+  display:block;
+  margin-bottom:8px;
+  font-size:12px;
+  color:var(--text2);
+  text-transform:uppercase;
+  letter-spacing:0.4px;
+}
+
+input,
+textarea{
   width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid var(--border2);
+  background:var(--surface);
   font-size:15px;
+  color:var(--text);
+}
+
+textarea{
+  resize:vertical;
+  line-height:1.6;
 }
 
 button{
-  background:#111;
-  color:white;
-  cursor:pointer;
+  width:100%;
+  padding:15px;
   border:none;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  font-size:15px;
+  cursor:pointer;
 }
 
 button:hover{
-  opacity:0.9;
+  opacity:0.95;
 }
 
 .status{
-  margin-top:15px;
-  padding:10px;
-  background:#f0f0f0;
-  border-radius:8px;
+  margin-top:16px;
+  padding:14px;
+  border-radius:10px;
+  background:var(--surface2);
+  font-size:14px;
 }
 
-pre{
-  white-space:pre-wrap;
+.card{
+  background:var(--surface);
+  border-radius:12px;
+  border:1px solid var(--border);
+  padding:16px;
+  margin-bottom:12px;
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:12px;
+  margin-right:5px;
+  margin-top:5px;
+  background:#ececec;
+}
+
+.green{
+  color:var(--green);
+}
+
+.red{
+  color:var(--red);
 }
 
 </style>
@@ -60,33 +145,72 @@ pre{
 
 <body>
 
-<div class="container">
-
+<header>
   <h1>Note Visite Pro</h1>
+  <p>AI + Drive + Calendar</p>
+</header>
 
-  <input
-    type="text"
-    id="cliente"
-    placeholder="Nome cliente"
-  />
+<div class="content">
 
-  <textarea
-    id="note"
-    rows="8"
-    placeholder="Scrivi qui le note visita..."
-  ></textarea>
+  <div class="section">
+    <label>Cliente</label>
 
-  <button onclick="loginGoogle()">
-    Connetti Google
-  </button>
+    <input
+      type="text"
+      id="cliente"
+      placeholder="Es. D'Introno"
+    >
+  </div>
 
-  <button onclick="salvaVisita()">
-    Salva visita + crea promemoria
-  </button>
+  <div class="section">
+    <label>Note visita</label>
 
-  <div class="status" id="status">
+    <textarea
+      id="noteText"
+      rows="7"
+      placeholder="Scrivi liberamente..."
+    ></textarea>
+  </div>
+
+  <div class="section">
+    <label>Promemoria tra</label>
+
+    <input
+      type="range"
+      min="5"
+      max="30"
+      value="10"
+      id="daysSlider"
+    >
+
+    <div style="margin-top:8px;">
+      <span id="daysValue">10</span> giorni
+    </div>
+  </div>
+
+  <div class="section">
+    <button onclick="driveLogin()">
+      Connetti Google
+    </button>
+  </div>
+
+  <div class="section">
+    <button onclick="elabora()">
+      Elabora · Salva · Crea Promemoria
+    </button>
+  </div>
+
+  <div
+    class="status"
+    id="status"
+  >
     Pronto
   </div>
+
+  <div
+    id="results"
+    style="margin-top:20px;"
+  ></div>
 
 </div>
 
@@ -100,141 +224,177 @@ const CLIENT_ID =
 const SCOPES =
 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events';
 
+const DEFAULT_BRANDS = [
+  'Megius',
+  'Mobilduenne',
+  'Navarti',
+  'Zenon',
+  'Sichenia',
+  'Serenissima'
+];
+
 const DEBUG = true;
 
 let tokenClient = null;
-let accessToken = null;
-let tokenExpiry = 0;
+
+let accessToken =
+  localStorage.getItem('drive_token') || null;
+
+let tokenExpiry =
+  parseInt(
+    localStorage.getItem(
+      'drive_token_expiry'
+    ) || '0'
+  );
+
+let savedKey =
+  localStorage.getItem(
+    'openai_key'
+  ) || '';
+
+document
+.getElementById('daysSlider')
+.addEventListener('input', function(){
+
+  document
+  .getElementById('daysValue')
+  .textContent = this.value;
+});
 
 function log(...args){
+
   if(DEBUG){
+
     console.log(...args);
   }
 }
 
 function setStatus(msg){
-  document.getElementById('status').innerHTML = msg;
+
+  document
+  .getElementById('status')
+  .innerHTML = msg;
 }
 
 window.onload = () => {
 
-  tokenClient = google.accounts.oauth2.initTokenClient({
+  initGoogle();
 
-    client_id: CLIENT_ID,
+  if(!savedKey){
 
-    scope: SCOPES,
+    const k = prompt(
+      'Inserisci OpenAI API Key'
+    );
 
-    callback: async (resp) => {
-
-      log(resp);
-
-      if(resp.error){
-
-        setStatus('Errore login Google');
-
-        return;
-      }
-
-      accessToken = resp.access_token;
-
-      tokenExpiry =
-        Date.now() + (resp.expires_in * 1000);
+    if(k){
 
       localStorage.setItem(
-        'google_access_token',
-        accessToken
+        'openai_key',
+        k
       );
 
-      localStorage.setItem(
-        'google_token_expiry',
-        tokenExpiry
-      );
-
-      setStatus('Google connesso ✓');
-
-      await verificaGoogleServices();
-    }
-  });
-
-  const savedToken =
-    localStorage.getItem('google_access_token');
-
-  const savedExpiry =
-    localStorage.getItem('google_token_expiry');
-
-  if(savedToken && savedExpiry){
-
-    if(Date.now() < parseInt(savedExpiry)){
-
-      accessToken = savedToken;
-      tokenExpiry = parseInt(savedExpiry);
-
-      setStatus('Sessione Google ripristinata ✓');
+      savedKey = k;
     }
   }
 };
 
-function loginGoogle(){
+function initGoogle(){
 
-  tokenClient.requestAccessToken({
-    prompt:'consent'
-  });
-}
+  tokenClient =
+    google.accounts.oauth2.initTokenClient({
 
-function isTokenValid(){
+      client_id:CLIENT_ID,
 
-  return (
-    accessToken &&
-    Date.now() < tokenExpiry
-  );
+      scope:SCOPES,
+
+      callback:async(resp)=>{
+
+        if(resp.error){
+
+          console.error(resp);
+
+          setStatus(
+            'Errore login Google'
+          );
+
+          return;
+        }
+
+        accessToken =
+          resp.access_token;
+
+        tokenExpiry =
+          Date.now() +
+          (resp.expires_in * 1000);
+
+        localStorage.setItem(
+          'drive_token',
+          accessToken
+        );
+
+        localStorage.setItem(
+          'drive_token_expiry',
+          tokenExpiry
+        );
+
+        setStatus(
+          'Google collegato ✓'
+        );
+
+        await verificaGoogleServices();
+      }
+    });
 }
 
 async function verificaGoogleServices(){
 
   try{
 
-    const driveRes = await fetch(
-      'https://www.googleapis.com/drive/v3/about?fields=user',
-      {
-        headers:{
-          Authorization:
-            'Bearer ' + accessToken
+    const driveCheck =
+      await fetch(
+        'https://www.googleapis.com/drive/v3/about?fields=user',
+        {
+          headers:{
+            Authorization:
+              'Bearer ' + accessToken
+          }
         }
-      }
-    );
+      );
 
-    if(!driveRes.ok){
+    if(!driveCheck.ok){
 
       throw new Error(
         'Drive API non disponibile'
       );
     }
 
-    const calendarRes = await fetch(
-      'https://www.googleapis.com/calendar/v3/users/me/calendarList',
-      {
-        headers:{
-          Authorization:
-            'Bearer ' + accessToken
+    const calCheck =
+      await fetch(
+        'https://www.googleapis.com/calendar/v3/users/me/calendarList',
+        {
+          headers:{
+            Authorization:
+              'Bearer ' + accessToken
+          }
         }
-      }
-    );
+      );
 
-    if(!calendarRes.ok){
+    if(!calCheck.ok){
 
-      const err = await calendarRes.json();
+      const err =
+        await calCheck.json();
 
       console.error(err);
 
       setStatus(
-        '⚠ Devi attivare Google Calendar API nel progetto Cloud'
+        '⚠ Attiva Google Calendar API nel progetto Cloud'
       );
 
       return;
     }
 
     setStatus(
-      'Drive + Calendar collegati ✓'
+      'Drive + Calendar connessi ✓'
     );
 
   }catch(e){
@@ -242,36 +402,52 @@ async function verificaGoogleServices(){
     console.error(e);
 
     setStatus(
-      'Errore verifica servizi Google'
+      'Errore verifica Google APIs'
     );
   }
 }
 
-async function salvaVisita(){
+function isTokenValid(){
 
-  if(!isTokenValid()){
+  return (
+    accessToken &&
+    Date.now() <
+    tokenExpiry - 60000
+  );
+}
 
-    setStatus(
-      'Connetti Google prima'
-    );
+function driveLogin(){
 
-    return;
-  }
+  tokenClient.requestAccessToken({
+    prompt:'consent'
+  });
+}
+
+async function elabora(){
 
   const cliente =
-    document.getElementById('cliente')
+    document
+    .getElementById('cliente')
     .value
     .trim();
 
   const note =
-    document.getElementById('note')
+    document
+    .getElementById('noteText')
     .value
     .trim();
+
+  const giorni =
+    parseInt(
+      document
+      .getElementById('daysSlider')
+      .value
+    );
 
   if(!cliente){
 
     setStatus(
-      'Inserisci il cliente'
+      'Inserisci cliente'
     );
 
     return;
@@ -280,7 +456,25 @@ async function salvaVisita(){
   if(!note){
 
     setStatus(
-      'Inserisci le note'
+      'Inserisci note'
+    );
+
+    return;
+  }
+
+  if(!savedKey){
+
+    setStatus(
+      'Manca API Key OpenAI'
+    );
+
+    return;
+  }
+
+  if(!isTokenValid()){
+
+    setStatus(
+      'Connetti Google'
     );
 
     return;
@@ -289,58 +483,95 @@ async function salvaVisita(){
   try{
 
     setStatus(
-      'Creazione file Drive...'
+      'AI in elaborazione...'
     );
 
-    const rootFolderId =
+    const aiData =
+      await analizzaConAI(
+        cliente,
+        note
+      );
+
+    renderAI(aiData);
+
+    setStatus(
+      'Creazione cartelle Drive...'
+    );
+
+    const rootId =
       await getOrCreateFolder(
         'Note Visite'
       );
 
-    const oggi = new Date();
+    const now =
+      new Date();
 
-    const nomeFile =
-      `${cliente}_${Date.now()}.txt`;
+    const yearFolder =
+      await getOrCreateFolder(
+        now.getFullYear().toString(),
+        rootId
+      );
 
-    const contenuto = `
-CLIENTE: ${cliente}
+    const monthFolder =
+      await getOrCreateFolder(
+        now.toLocaleDateString(
+          'it-IT',
+          {month:'long'}
+        ),
+        yearFolder
+      );
 
-DATA:
-${oggi.toLocaleDateString('it-IT')}
+    for(const brand of aiData.brand_estratti){
+
+      const contenuto =
+`CLIENTE:
+${cliente}
+
+BRAND:
+${brand.brand}
+
+SITUAZIONE:
+${brand.situazione}
+
+AZIONI:
+${(brand.azioni || [])
+.map(a=>'• ' + a)
+.join('\n')}
 
 NOTE:
 ${note}
 `;
 
-    await uploadFile(
-      nomeFile,
-      contenuto,
-      rootFolderId
-    );
+      const nomeFile =
+`${cliente}_${brand.brand}_${Date.now()}.txt`;
+
+      await uploadFile(
+        nomeFile,
+        contenuto,
+        monthFolder
+      );
+    }
 
     setStatus(
-      'File salvato ✓'
-    );
-
-    setStatus(
-      'Creazione promemoria Calendar...'
+      'File salvati su Drive ✓'
     );
 
     const promemoria =
       new Date();
 
     promemoria.setDate(
-      promemoria.getDate() + 10
+      promemoria.getDate() +
+      giorni
     );
 
     await creaEventoCalendar(
       cliente,
-      note,
+      aiData,
       promemoria
     );
 
     setStatus(
-      'Tutto completato ✓'
+      'Workflow completato ✓'
     );
 
   }catch(e){
@@ -353,53 +584,203 @@ ${note}
   }
 }
 
-async function getOrCreateFolder(name){
+async function analizzaConAI(
+  cliente,
+  note
+){
 
-  const q =
-    `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  const res =
+    await fetch(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        method:'POST',
 
-  const res = await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`,
+        headers:{
+          'Content-Type':
+            'application/json',
+
+          Authorization:
+            'Bearer ' + savedKey
+        },
+
+        body:JSON.stringify({
+
+          model:'gpt-4o-mini',
+
+          response_format:{
+            type:'json_object'
+          },
+
+          messages:[
+            {
+              role:'system',
+
+              content:
+`Analizza note commerciali.
+
+Rispondi SOLO JSON:
+
+{
+  "riassunto_visita":"",
+  "brand_estratti":[
     {
-      headers:{
-        Authorization:
-          'Bearer ' + accessToken
-      }
+      "brand":"",
+      "situazione":"",
+      "interesse":"",
+      "azioni":[]
     }
-  );
+  ]
+}`
+            },
 
-  const data = await res.json();
+            {
+              role:'user',
+
+              content:
+`Cliente:
+${cliente}
+
+Note:
+${note}`
+            }
+          ]
+        })
+      }
+    );
+
+  const data =
+    await res.json();
+
+  const raw =
+    data
+    .choices?.[0]
+    ?.message
+    ?.content || '{}';
+
+  return JSON.parse(raw);
+}
+
+function renderAI(data){
+
+  const results =
+    document
+    .getElementById('results');
+
+  results.innerHTML =
+`
+<div class="card">
+  <h3>
+    Riassunto visita
+  </h3>
+
+  <div style="margin-top:10px;">
+    ${data.riassunto_visita}
+  </div>
+</div>
+
+${(data.brand_estratti || [])
+.map(b=>`
+<div class="card">
+
+  <div>
+    <span class="badge">
+      ${b.brand}
+    </span>
+
+    <span class="badge">
+      interesse ${b.interesse}
+    </span>
+  </div>
+
+  <div style="margin-top:12px;">
+    ${b.situazione}
+  </div>
+
+  <div style="margin-top:12px;">
+
+    ${(b.azioni || [])
+    .map(a=>`
+      <div>
+        → ${a}
+      </div>
+    `)
+    .join('')}
+
+  </div>
+
+</div>
+`)
+.join('')}
+`;
+}
+
+async function getOrCreateFolder(
+  name,
+  parentId=null
+){
+
+  let q =
+`name='${name}'
+and mimeType='application/vnd.google-apps.folder'
+and trashed=false`;
+
+  if(parentId){
+
+    q +=
+` and '${parentId}' in parents`;
+  }
+
+  const res =
+    await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`,
+      {
+        headers:{
+          Authorization:
+            'Bearer ' + accessToken
+        }
+      }
+    );
+
+  const data =
+    await res.json();
 
   if(data.files.length){
 
     return data.files[0].id;
   }
 
-  const createRes = await fetch(
-    'https://www.googleapis.com/drive/v3/files',
-    {
-      method:'POST',
+  const meta = {
+    name:name,
+    mimeType:
+      'application/vnd.google-apps.folder'
+  };
 
-      headers:{
-        Authorization:
-          'Bearer ' + accessToken,
+  if(parentId){
 
-        'Content-Type':
-          'application/json'
-      },
+    meta.parents = [parentId];
+  }
 
-      body:JSON.stringify({
+  const create =
+    await fetch(
+      'https://www.googleapis.com/drive/v3/files',
+      {
+        method:'POST',
 
-        name:name,
+        headers:{
+          Authorization:
+            'Bearer ' + accessToken,
 
-        mimeType:
-          'application/vnd.google-apps.folder'
-      })
-    }
-  );
+          'Content-Type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify(meta)
+      }
+    );
 
   const created =
-    await createRes.json();
+    await create.json();
 
   return created.id;
 }
@@ -432,22 +813,23 @@ ${contenuto}
 
 --${boundary}--`;
 
-  const res = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-    {
-      method:'POST',
+  const res =
+    await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+      {
+        method:'POST',
 
-      headers:{
-        Authorization:
-          'Bearer ' + accessToken,
+        headers:{
+          Authorization:
+            'Bearer ' + accessToken,
 
-        'Content-Type':
-          `multipart/related; boundary=${boundary}`
-      },
+          'Content-Type':
+            `multipart/related; boundary=${boundary}`
+        },
 
-      body:body
-    }
-  );
+        body:body
+      }
+    );
 
   if(!res.ok){
 
@@ -464,7 +846,7 @@ ${contenuto}
 
 async function creaEventoCalendar(
   cliente,
-  note,
+  aiData,
   dataPromemoria
 ){
 
@@ -478,7 +860,7 @@ async function creaEventoCalendar(
     endDate.getDate() + 1
   );
 
-  const formatDate = (d) => {
+  const formatDate = (d)=>{
 
     return `${d.getFullYear()}-${String(
       d.getMonth()+1
@@ -493,7 +875,14 @@ async function creaEventoCalendar(
       `Revisita ${cliente}`,
 
     description:
-      note,
+`
+${aiData.riassunto_visita}
+
+Brand:
+${(aiData.brand_estratti || [])
+.map(b=>`• ${b.brand}`)
+.join('\n')}
+`,
 
     start:{
       date:
@@ -517,23 +906,24 @@ async function creaEventoCalendar(
     }
   };
 
-  const res = await fetch(
-    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-    {
-      method:'POST',
+  const res =
+    await fetch(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+      {
+        method:'POST',
 
-      headers:{
-        Authorization:
-          'Bearer ' + accessToken,
+        headers:{
+          Authorization:
+            'Bearer ' + accessToken,
 
-        'Content-Type':
-          'application/json'
-      },
+          'Content-Type':
+            'application/json'
+        },
 
-      body:
-        JSON.stringify(evento)
-    }
-  );
+        body:
+          JSON.stringify(evento)
+      }
+    );
 
   const result =
     await res.json();
@@ -544,7 +934,7 @@ async function creaEventoCalendar(
 
     throw new Error(
       result.error?.message ||
-      'Errore Calendar'
+      'Errore Google Calendar'
     );
   }
 }
