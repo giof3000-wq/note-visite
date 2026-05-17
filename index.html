@@ -456,7 +456,7 @@ I brand del portfolio: ${brandString}.
 Estrai info per ogni brand menzionato. Rispondi SOLO con JSON:
 {
   "riassunto_visita": "1-2 righe riassunto generale",
-  "titolo_calendario": "Revisita [Cliente] - max 60 caratteri",
+  "titolo_calendario": "Ricontatta [Cliente] - max 60 caratteri",
   "brand_estratti": [
     {
       "brand": "Nome Brand",
@@ -711,7 +711,7 @@ async function creaEventoCalendar(cliente, titolo, riassunto, brand_estratti, da
   ].join('\n');
 
   const evento = {
-    summary: titolo || `Revisita ${cliente}`,
+    summary: titolo || `Ricontatta ${cliente}`,
     description: descrizione,
     start: { date: dateStr },
     end: { date: dateStr },
