@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Note Visite">
+<link rel="apple-touch-icon" href="/note-visite/icon.png">
+<link rel="icon" href="/note-visite/icon.png">
+<title>Note Visite Pro</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f4f1; --surface: #ffffff; --surface2: #f0efe9;
+  --border: rgba(0,0,0,0.10); --border2: rgba(0,0,0,0.18);
+  --text: #1a1a18; --text2: #6b6b66; --text3: #9b9b94; --accent: #1a1a18;
+  --blue-bg: #e6f1fb; --blue-text: #0c447c;
+  --green-bg: #eaf3de; --green-text: #3b6d11;
+  --amber-bg: #faeeda; --amber-text: #854f0b;
+  --red: #E24B4A; --red-bg: #fcebeb; --red-text: #a32d2d;
+  --teal-bg: #e1f5ee; --teal-text: #0f6e56;
+  --purple-bg: #eeedfe; --purple-text: #533ab7;
+  --radius: 12px; --radius-sm: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1a; --surface: #2a2a27; --surface2: #333330;
+    --border: rgba(255,255,255,0.10); --border2: rgba(255,255,255,0.18);
+    --text: #f0efe9; --text2: #a0a09a; --text3: #6b6b66; --accent: #f0efe9;
+    --blue-bg: #042c53; --blue-text: #85b7eb;
+    --green-bg: #173404; --green-text: #c0dd97;
+    --amber-bg: #412402; --amber-text: #fac775;
+    --red-bg: #501313; --red-text: #f09595;
+    --teal-bg: #04342c; --teal-text: #5dcaa5;
+    --purple-bg: #26215c; --purple-text: #afa9ec;
+  }
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
+header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 16px 20px 12px; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+header div h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+header div p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.drive-status { font-size: 12px; padding: 4px 10px; border-radius: 20px; cursor: pointer; border: none; font-family: inherit; }
+.drive-status.connected { background: var(--green-bg); color: var(--green-text); }
+.drive-status.disconnected { background: var(--amber-bg); color: var(--amber-text); }
+.tab-bar { display: flex; background: var(--surface); border-bottom: 0.5px solid var(--border); }
+.tab { flex: 1; padding: 11px 4px; font-size: 12px; color: var(--text2); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; font-family: inherit; transition: all 0.15s; }
+.tab.active { color: var(--text); font-weight: 500; border-bottom-color: var(--accent); }
+.content { padding: 20px 16px; }
+.section { margin-bottom: 20px; }
+label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+input[type=text], input[type=password], textarea { width: 100%; padding: 12px 14px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+input:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; line-height: 1.5; }
+button.primary { width: 100%; padding: 14px; background: var(--accent); color: var(--bg); border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; transition: opacity 0.15s; margin-bottom: 10px; }
+button.primary:active { opacity: 0.8; }
+button.primary.outline { background: var(--surface); color: var(--text); border: 0.5px solid var(--border2); }
+button.secondary { width: 100%; padding: 12px; background: var(--surface); color: var(--text); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; cursor: pointer; }
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.card-sub { font-size: 12px; color: var(--text2); }
+.rec-center { display: flex; flex-direction: column; align-items: center; padding: 16px 0 10px; }
+.rec-btn { width: 72px; height: 72px; border-radius: 50%; border: 1.5px solid var(--border2); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-bottom: 10px; }
+.rec-btn svg { width: 28px; height: 28px; fill: var(--text); }
+.rec-btn.recording { border-color: var(--red); background: var(--red-bg); animation: pulse 1.2s ease-in-out infinite; }
+.rec-btn.recording svg { fill: var(--red-text); }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07)} }
+.rec-status { font-size: 13px; color: var(--text2); text-align: center; }
+.days-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; }
+.days-row span { font-size: 13px; color: var(--text2); white-space: nowrap; }
+.days-row input[type=range] { flex: 1; }
+.days-num { font-size: 16px; font-weight: 600; color: var(--text); min-width: 24px; text-align: center; }
+.status-msg { font-size: 13px; color: var(--text2); text-align: center; padding: 10px 0; min-height: 36px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.spinner { width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--text); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 3px 10px; border-radius: 6px; margin-right: 4px; margin-bottom: 4px; }
+.badge-green { background: var(--green-bg); color: var(--green-text); }
+.badge-blue { background: var(--blue-bg); color: var(--blue-text); }
+.badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+.badge-teal { background: var(--teal-bg); color: var(--teal-text); }
+.badge-purple { background: var(--purple-bg); color: var(--purple-text); }
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; }
+.stat-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.stat-val { font-size: 22px; font-weight: 600; }
+.log-item { border-bottom: 0.5px solid var(--border); padding: 14px 0; }
+.log-item:last-child { border-bottom: none; }
+.log-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.log-name { font-size: 15px; font-weight: 500; }
+.log-date { font-size: 12px; color: var(--text3); }
+.log-summary { font-size: 13px; color: var(--text2); margin-bottom: 8px; line-height: 1.5; }
+.divider { height: 0.5px; background: var(--border); margin: 20px 0; }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 100; opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none; }
+.toast.show { opacity: 1; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 14px; }
+.brand-file-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; }
+.brand-file-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.brand-file-preview { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.report-box { background: var(--surface2); border-radius: var(--radius-sm); padding: 16px; font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; margin-bottom: 16px; }
+.week-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.week-selector button { padding: 8px 14px; background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; color: var(--text); cursor: pointer; }
+.week-selector span { flex: 1; text-align: center; font-size: 14px; font-weight: 500; }
+.upload-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+.upload-ok { color: var(--green-text); }
+.upload-fail { color: var(--red-text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Note Visite Pro</h1>
+    <p>Multi-brand · Drive automatico</p>
+  </div>
+  <button class="drive-status disconnected" id="driveBtn" onclick="driveLogin()">
+    ⬤ Drive
+  </button>
+</header>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('nuova')">Nuova visita</button>
+  <button class="tab" onclick="switchTab('storico')">Storico</button>
+  <button class="tab" onclick="switchTab('report')">Report</button>
+  <button class="tab" onclick="switchTab('impostazioni')">Setup</button>
+</div>
+
+<div class="content">
+
+  <!-- TAB NUOVA VISITA -->
+  <div id="tab-nuova">
+    <div class="section">
+      <label>Cliente visitato</label>
+      <input type="text" id="cliente" placeholder="es. D'introno, Quartarella, Ellegidue...">
+    </div>
+    <div class="section">
+      <label>Nota vocale</label>
+      <div class="rec-center">
+        <button class="rec-btn" id="recBtn" onclick="toggleRec()">
+          <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/></svg>
+        </button>
+        <div class="rec-status" id="recStatus">Clicca per registrare</div>
+      </div>
+    </div>
+    <div class="section">
+      <label>Oppure scrivi la nota</label>
+      <textarea id="noteText" rows="5" placeholder="Parla liberamente di tutti i brand. Es: 'Su Megius interesse per il 120x120, su Mobilduenne ancora freddi...'"></textarea>
+    </div>
+    <div class="section">
+      <label>Promemoria prossima visita</label>
+      <div class="days-row">
+        <span>Tra</span>
+        <input type="range" min="5" max="30" value="10" step="1" id="daysSlider"
+          oninput="document.getElementById('daysVal').textContent=this.value">
+        <span class="days-num" id="daysVal">10</span>
+        <span>giorni</span>
+      </div>
+    </div>
+    <div id="aiResult" style="display:none;" class="section">
+      <label>File generati per brand</label>
+      <div id="brandFiles"></div>
+      <div id="uploadResults"></div>
+    </div>
+    <div class="status-msg" id="mainStatus"></div>
+    <button class="primary" onclick="elabora()">Elabora · Salva su Drive · Crea promemoria</button>
+  </div>
+
+  <!-- TAB STORICO -->
+  <div id="tab-storico" style="display:none;">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Visite totali</div><div class="stat-val" id="totVisite">0</div></div>
+      <div class="stat-card"><div class="stat-label">Clienti diversi</div><div class="stat-val" id="totClienti">0</div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">File su Drive</div><div class="stat-val" id="totFile">0</div></div>
+      <div class="stat-card"><div class="stat-label">Brand attivi</div><div class="stat-val" id="totBrand">0</div></div>
+    </div>
+    <div id="logList"><div class="empty-state">Nessuna visita ancora registrata</div></div>
+  </div>
+
+  <!-- TAB REPORT -->
+  <div id="tab-report" style="display:none;">
+    <div class="week-selector">
+      <button onclick="changeWeek(-1)">◀</button>
+      <span id="weekLabel">Questa settimana</span>
+      <button onclick="changeWeek(1)">▶</button>
+    </div>
+    <div id="reportResult" style="display:none;">
+      <div class="report-box" id="reportText"></div>
+      <button class="primary" onclick="salvaReportDrive()">Salva report su Drive</button>
+      <button class="primary outline" onclick="copiaReport()">Copia testo</button>
+    </div>
+    <div class="status-msg" id="reportStatus"></div>
+    <button class="primary" onclick="generaReport()">Genera report settimanale</button>
+    <div style="margin-top:16px; font-size:12px; color:var(--text2); line-height:1.6;">
+      Analizza tutte le visite della settimana e genera un riepilogo per brand con risultati, opportunità e azioni prioritarie.
+    </div>
+  </div>
+
+  <!-- TAB SETUP -->
+  <div id="tab-impostazioni" style="display:none;">
+    <div class="card">
+      <div class="card-title">Google Drive</div>
+      <div class="card-sub" style="margin-bottom:12px;">Connetti il tuo account per salvare i file automaticamente.</div>
+      <button class="primary" onclick="driveLogin()" id="driveLoginBtn">Connetti Google Drive</button>
+      <div id="driveInfo" style="font-size:13px; color:var(--text2); margin-top:8px;"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-title">API Key OpenAI</div>
+      <div class="card-sub" style="margin-bottom:12px;">Per trascrizione vocale (Whisper) e AI (GPT-4o mini). Circa 1-2€/mese.</div>
+      <input type="password" id="apiKey" placeholder="sk-...">
+      <div style="margin-top:10px;"><button class="primary" onclick="salvaKey()">Salva API Key</button></div>
+      <div style="font-size:12px; color:var(--text2); margin-top:8px;">Salvata solo sul dispositivo.</div>
+    </div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-title">Brand nel portfolio</div>
+      <div class="card-sub" style="margin-bottom:12px;">L'AI li riconosce automaticamente dalla nota vocale.</div>
+      <textarea id="brandList" rows="6" style="font-size:13px;"></textarea>
+      <div style="margin-top:10px;"><button class="primary" onclick="salvaBrand()">Salva brand</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card" style="border-color: rgba(226,75,74,0.2);">
+      <div class="card-title">Dati locali</div>
+      <div class="card-sub" style="margin-bottom:12px;">Storico salvato nel browser.</div>
+      <button class="secondary" onclick="cancellaStorico()" style="color: var(--red-text);">Cancella storico locale</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/google-auth-library@9.0.0/build/src/auth/oauth2client.js"></script>
+<script>
+const CLIENT_ID = '861244244527-vtr1oohc8n3pb22ior3g5m7tp1a9u858.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+const DEFAULT_BRANDS = ['Megius','Mobilduenne','Navarti','Zenon','Sichenia','Grespania','Serenissima','CIR','Cerasarda'];
+const BRAND_COLORS = ['badge-blue','badge-teal','badge-amber','badge-purple','badge-green','badge-blue','badge-teal','badge-amber','badge-purple'];
+
+let tokenClient = null;
+let accessToken = localStorage.getItem('drive_token') || null;
+let tokenExpiry = parseInt(localStorage.getItem('drive_token_expiry') || '0');
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let visits = JSON.parse(localStorage.getItem('fieldVisits_v3') || '[]');
+let savedKey = localStorage.getItem('openai_key') || '';
+let brandList = JSON.parse(localStorage.getItem('brandList') || JSON.stringify(DEFAULT_BRANDS));
+let currentWeekOffset = 0;
+let lastReport = '';
+
+function init() {
+  if (savedKey) document.getElementById('apiKey').value = savedKey;
+  document.getElementById('brandList').value = brandList.join('\n');
+  updateDriveUI();
+  loadGIS();
+}
+
+function loadGIS() {
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = initGIS;
+  document.head.appendChild(s);
+}
+
+function initGIS() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) { showToast('Errore login: ' + resp.error); return; }
+      accessToken = resp.access_token;
+      tokenExpiry = Date.now() + (resp.expires_in * 1000);
+      localStorage.setItem('drive_token', accessToken);
+      localStorage.setItem('drive_token_expiry', tokenExpiry);
+      updateDriveUI();
+      showToast('Google Drive connesso ✓');
+    }
+  });
+}
+
+function isTokenValid() {
+  return accessToken && Date.now() < tokenExpiry - 60000;
+}
+
+function driveLogin() {
+  if (!tokenClient) { showToast('Caricamento in corso, riprova...'); return; }
+  if (isTokenValid()) {
+    accessToken = null;
+    localStorage.removeItem('drive_token');
+    localStorage.removeItem('drive_token_expiry');
+    updateDriveUI();
+    showToast('Drive disconnesso');
+    return;
+  }
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function updateDriveUI() {
+  const btn = document.getElementById('driveBtn');
+  const loginBtn = document.getElementById('driveLoginBtn');
+  const info = document.getElementById('driveInfo');
+  if (isTokenValid()) {
+    btn.className = 'drive-status connected';
+    btn.textContent = '⬤ Drive';
+    if (loginBtn) loginBtn.textContent = 'Disconnetti Drive';
+    if (info) info.textContent = '✓ Connesso — i file vengono salvati automaticamente.';
+  } else {
+    btn.className = 'drive-status disconnected';
+    btn.textContent = '⬤ Drive';
+    if (loginBtn) loginBtn.textContent = 'Connetti Google Drive';
+    if (info) info.textContent = 'Non connesso — connetti per salvare i file automaticamente.';
+  }
+}
+
+async function getOrCreateFolder(name, parentId = null) {
+  let q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  if (parentId) q += ` and '${parentId}' in parents`;
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, {
+    headers: { 'Authorization': 'Bearer ' + accessToken }
+  });
+  const data = await res.json();
+  if (data.files && data.files.length > 0) return data.files[0].id;
+  const meta = { name, mimeType: 'application/vnd.google-apps.folder' };
+  if (parentId) meta.parents = [parentId];
+  const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify(meta)
+  });
+  const created = await createRes.json();
+  return created.id;
+}
+
+async function uploadFileToDrive(nome, contenuto, folderId) {
+  const boundary = 'notevisite_boundary';
+  const meta = JSON.stringify({ name: nome, parents: [folderId], mimeType: 'text/plain' });
+  const body = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${contenuto}\r\n--${boundary}--`;
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + accessToken,
+      'Content-Type': `multipart/related; boundary=${boundary}`
+    },
+    body
+  });
+  return res.ok;
+}
+
+function switchTab(name) {
+  ['nuova','storico','report','impostazioni'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach((b,i) => {
+    b.classList.toggle('active', ['nuova','storico','report','impostazioni'][i]===name);
+  });
+  if (name==='storico') renderLog();
+  if (name==='report') updateWeekLabel();
+}
+
+function salvaKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k.startsWith('sk-')) { showToast('La API key deve iniziare con sk-'); return; }
+  localStorage.setItem('openai_key', k);
+  savedKey = k;
+  showToast('API key salvata ✓');
+}
+
+function salvaBrand() {
+  brandList = document.getElementById('brandList').value.split('\n').map(b=>b.trim()).filter(Boolean);
+  localStorage.setItem('brandList', JSON.stringify(brandList));
+  showToast('Brand salvati ✓');
+}
+
+async function toggleRec() {
+  if (isRecording) stopRec(); else startRec();
+}
+
+async function startRec() {
+  if (!savedKey) { showToast('Inserisci prima la API key nel Setup'); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = transcribeAudio;
+    mediaRecorder.start();
+    isRecording = true;
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('recBtn').innerHTML = `<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+    document.getElementById('recStatus').textContent = 'Registrazione... clicca per fermare';
+  } catch(e) { showToast('Microfono non disponibile'); }
+}
+
+function stopRec() {
+  if (mediaRecorder) mediaRecorder.stop();
+  isRecording = false;
+  document.getElementById('recBtn').classList.remove('recording');
+  document.getElementById('recBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/></svg>`;
+  document.getElementById('recStatus').textContent = 'Trascrizione in corso...';
+}
+
+async function transcribeAudio() {
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  const fd = new FormData();
+  fd.append('file', blob, 'audio.webm');
+  fd.append('model', 'whisper-1');
+  fd.append('language', 'it');
+  try {
+    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + savedKey },
+      body: fd
+    });
+    const data = await res.json();
+    if (data.text) {
+      document.getElementById('noteText').value = data.text;
+      document.getElementById('recStatus').textContent = 'Trascrizione completata ✓';
+      showToast('Audio trascritto ✓');
+    } else {
+      document.getElementById('recStatus').textContent = 'Errore trascrizione';
+    }
+  } catch(e) { showToast('Errore trascrizione'); }
+}
+
+async function elabora() {
+  const cliente = document.getElementById('cliente').value.trim();
+  const note = document.getElementById('noteText').value.trim();
+  const giorni = parseInt(document.getElementById('daysSlider').value);
+
+  if (!cliente) { showToast('Inserisci il nome del cliente'); return; }
+  if (!note) { showToast('Inserisci una nota o registra un audio'); return; }
+  if (!savedKey) { showToast('Inserisci la API key nel Setup'); return; }
+
+  setStatus(true, 'AI in ascolto... estrazione brand e note');
+
+  try {
+    const brandString = brandList.join(', ');
+    const oggi = new Date();
+    const dateStr = oggi.toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'});
+    const meseStr = oggi.toLocaleDateString('it-IT', {month:'long'});
+    const annoStr = oggi.getFullYear().toString();
+
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + savedKey },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'system',
+            content: `Sei l'assistente di Sergio, agente commerciale nel settore materiali edili e arredo bagno in Puglia.
+I brand del portfolio: ${brandString}.
+Estrai info per ogni brand menzionato. Rispondi SOLO con JSON:
+{
+  "riassunto_visita": "1-2 righe riassunto generale",
+  "titolo_calendario": "Revisita [Cliente] - max 60 caratteri",
+  "brand_estratti": [
+    {
+      "brand": "Nome Brand",
+      "situazione": "situazione con questo cliente",
+      "interesse": "alto|medio|basso|neutro",
+      "punti": ["punto 1","punto 2"],
+      "azioni": ["azione 1","azione 2"],
+      "nome_file": "NomeCliente_NomeBrand_GiornoMese.txt"
+    }
+  ]
+}
+Se nessun brand è menzionato, usa brand "Generale".`
+          },
+          { role: 'user', content: `Cliente: ${cliente}\nData: ${dateStr}\nNote: ${note}` }
+        ]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.choices?.[0]?.message?.content || '{}';
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch(e) { parsed = null; }
+    if (!parsed?.brand_estratti) { setStatus(false, 'Errore elaborazione AI'); return; }
+
+    const brandFiles = parsed.brand_estratti.map(b => ({
+      ...b,
+      contenuto: generaContenutoFile(cliente, dateStr, parsed.riassunto_visita, b, note)
+    }));
+
+    renderBrandFiles(brandFiles);
+    document.getElementById('aiResult').style.display = 'block';
+
+    const visit = {
+      id: Date.now(), cliente, data: oggi.toISOString(), note,
+      riassunto: parsed.riassunto_visita, brand_estratti: parsed.brand_estratti, giorni
+    };
+    visits.unshift(visit);
+    localStorage.setItem('fieldVisits_v3', JSON.stringify(visits));
+
+    if (isTokenValid()) {
+      setStatus(true, `Salvataggio ${brandFiles.length} file su Drive...`);
+      try {
+        const rootId = await getOrCreateFolder('Note Visite');
+        const annoId = await getOrCreateFolder(annoStr, rootId);
+        const meseId = await getOrCreateFolder(meseStr, annoId);
+        const results = [];
+        for (const f of brandFiles) {
+          const ok = await uploadFileToDrive(f.nome_file, f.contenuto, meseId);
+          results.push({ nome: f.nome_file, ok });
+        }
+        renderUploadResults(results);
+        const ok = results.filter(r=>r.ok).length;
+        setStatus(false, `✓ ${ok}/${brandFiles.length} file salvati su Drive`);
+      } catch(e) {
+        setStatus(false, '⚠ Errore Drive: ' + e.message);
+      }
+    } else {
+      setStatus(false, 'Drive non connesso — file non salvati. Connetti Drive nel Setup.');
+    }
+
+    const dataPromemoria = new Date(oggi);
+    dataPromemoria.setDate(dataPromemoria.getDate() + giorni);
+    const y = dataPromemoria.getFullYear();
+    const m = String(dataPromemoria.getMonth()+1).padStart(2,'0');
+    const d = String(dataPromemoria.getDate()).padStart(2,'0');
+    const calDateStr = `${y}${m}${d}`;
+    const desc = `Visita del: ${oggi.toLocaleDateString('it-IT')}\n\n${parsed.riassunto_visita}\n\nBrand: ${parsed.brand_estratti.map(b=>b.brand).join(', ')}`;
+    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(parsed.titolo_calendario||'Visita '+cliente)}&dates=${calDateStr}/${calDateStr}&details=${encodeURIComponent(desc)}`;
+
+    setTimeout(() => {
+      if (confirm(`Vuoi creare il promemoria su Google Calendar per il ${dataPromemoria.toLocaleDateString('it-IT')}?`)) {
+        window.open(calUrl, '_blank');
+      }
+    }, 500);
+
+    document.getElementById('cliente').value = '';
+    document.getElementById('noteText').value = '';
+    document.getElementById('recStatus').textContent = 'Clicca per registrare';
+    document.getElementById('aiResult').style.display = 'none';
+    document.getElementById('uploadResults').innerHTML = '';
+
+  } catch(e) {
+    setStatus(false, 'Errore: ' + e.message);
+  }
+}
+
+function generaContenutoFile(cliente, data, riassunto, brand, noteOriginali) {
+  return [
+    `NOTA VISITA`,
+    `═══════════════════════════════════`,
+    `Cliente:   ${cliente}`,
+    `Brand:     ${brand.brand}`,
+    `Data:      ${data}`,
+    `Interesse: ${brand.interesse.toUpperCase()}`,
+    ``,
+    `SITUAZIONE`,
+    `───────────`,
+    brand.situazione,
+    ``,
+    `PUNTI CHIAVE`,
+    `───────────`,
+    ...(brand.punti||[]).map(p=>`• ${p}`),
+    ``,
+    `AZIONI DA FARE`,
+    `───────────`,
+    ...(brand.azioni||[]).map(a=>`→ ${a}`),
+    ``,
+    `NOTE ORIGINALI`,
+    `───────────`,
+    noteOriginali,
+    ``,
+    `───────────────────────────────────`,
+    `Generato il ${data} — Note Visite Pro`,
+  ].join('\n');
+}
+
+function renderBrandFiles(brandFiles) {
+  document.getElementById('brandFiles').innerHTML = brandFiles.map((b, i) => {
+    const color = BRAND_COLORS[i % BRAND_COLORS.length];
+    const ic = {alto:'badge-green',medio:'badge-amber',basso:'badge-teal',neutro:'badge-blue'}[b.interesse]||'badge-blue';
+    return `<div class="brand-file-item">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span class="badge ${color}">${b.brand}</span>
+        <span class="badge ${ic}">interesse ${b.interesse}</span>
+      </div>
+      <div class="brand-file-name">${b.nome_file}</div>
+      <div class="brand-file-preview">${(b.situazione||'').substring(0,80)}...</div>
+      ${b.azioni?.length ? `<div style="font-size:12px;color:var(--text2);margin-top:4px;">→ ${b.azioni[0]}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderUploadResults(results) {
+  document.getElementById('uploadResults').innerHTML = results.map(r =>
+    `<div class="upload-row">
+      <span style="font-size:12px;">${r.nome}</span>
+      <span class="${r.ok ? 'upload-ok' : 'upload-fail'}">${r.ok ? '✓ Salvato' : '✗ Errore'}</span>
+    </div>`
+  ).join('');
+}
+
+function getWeekRange(offset) {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diff + (offset * 7));
+  monday.setHours(0,0,0,0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23,59,59,999);
+  return { monday, sunday };
+}
+
+function updateWeekLabel() {
+  const { monday, sunday } = getWeekRange(currentWeekOffset);
+  const opts = { day:'2-digit', month:'short' };
+  if (currentWeekOffset === 0) document.getElementById('weekLabel').textContent = 'Questa settimana';
+  else if (currentWeekOffset === -1) document.getElementById('weekLabel').textContent = 'Settimana scorsa';
+  else document.getElementById('weekLabel').textContent = `${monday.toLocaleDateString('it-IT',opts)} – ${sunday.toLocaleDateString('it-IT',opts)}`;
+}
+
+function changeWeek(dir) {
+  currentWeekOffset += dir;
+  if (currentWeekOffset > 0) currentWeekOffset = 0;
+  updateWeekLabel();
+  document.getElementById('reportResult').style.display = 'none';
+  setReportStatus(false, '');
+}
+
+async function generaReport() {
+  const { monday, sunday } = getWeekRange(currentWeekOffset);
+  const visiteSett = visits.filter(v => { const d = new Date(v.data); return d >= monday && d <= sunday; });
+  if (!visiteSett.length) { setReportStatus(false, 'Nessuna visita in questa settimana.'); return; }
+  if (!savedKey) { showToast('Inserisci la API key nel Setup'); return; }
+  setReportStatus(true, `Analisi di ${visiteSett.length} visite...`);
+
+  const riepilogo = visiteSett.map(v => {
+    const brands = (v.brand_estratti||[]).map(b=>`  - ${b.brand}: ${b.situazione||''} (interesse: ${b.interesse||'nd'})`).join('\n');
+    return `Cliente: ${v.cliente} — ${new Date(v.data).toLocaleDateString('it-IT')}\n${brands||'  - '+v.note}`;
+  }).join('\n\n');
+
+  try {
+    const periodoStr = `${monday.toLocaleDateString('it-IT')} – ${sunday.toLocaleDateString('it-IT')}`;
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + savedKey },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `Sei l'assistente di Sergio, agente commerciale in Puglia nel settore materiali edili e arredo bagno.
+Genera un report settimanale professionale e orientato all'azione.
+Struttura:
+1. Intestazione con periodo e numeri chiave
+2. Riepilogo per brand (solo quelli con dati)
+3. Top opportunità della settimana
+4. Azioni prioritarie settimana prossima
+5. Segnali di attenzione (clienti freddi, problemi emersi)
+Stile: diretto, professionale, italiano. Usa simboli (•, →, ✓, ⚠).`
+          },
+          { role: 'user', content: `Periodo: ${periodoStr}\n\nVisite:\n\n${riepilogo}` }
+        ]
+      })
+    });
+    const data = await res.json();
+    lastReport = data.choices?.[0]?.message?.content || '';
+    if (!lastReport) { setReportStatus(false, 'Errore generazione report'); return; }
+    document.getElementById('reportText').textContent = lastReport;
+    document.getElementById('reportResult').style.display = 'block';
+    setReportStatus(false, '');
+  } catch(e) {
+    setReportStatus(false, 'Errore: ' + e.message);
+  }
+}
+
+async function salvaReportDrive() {
+  if (!lastReport) return;
+  if (!isTokenValid()) { showToast('Connetti Drive nel Setup'); return; }
+  const { monday } = getWeekRange(currentWeekOffset);
+  const settimana = monday.toLocaleDateString('it-IT').replace(/\//g,'-');
+  const nomeFile = `Report_Settimanale_${settimana}.txt`;
+  try {
+    const rootId = await getOrCreateFolder('Note Visite');
+    const reportId = await getOrCreateFolder('Report', rootId);
+    const ok = await uploadFileToDrive(nomeFile, lastReport, reportId);
+    showToast(ok ? `Report salvato su Drive ✓` : 'Errore salvataggio');
+  } catch(e) {
+    showToast('Errore Drive: ' + e.message);
+  }
+}
+
+function copiaReport() {
+  if (!lastReport) return;
+  navigator.clipboard.writeText(lastReport).then(() => showToast('Report copiato ✓'));
+}
+
+function setStatus(loading, msg) {
+  document.getElementById('mainStatus').innerHTML = loading ? `<div class="spinner"></div>${msg}` : msg;
+}
+
+function setReportStatus(loading, msg) {
+  document.getElementById('reportStatus').innerHTML = loading ? `<div class="spinner"></div>${msg}` : msg;
+}
+
+function renderLog() {
+  const el = document.getElementById('logList');
+  document.getElementById('totVisite').textContent = visits.length;
+  document.getElementById('totClienti').textContent = new Set(visits.map(v=>v.cliente)).size;
+  document.getElementById('totFile').textContent = visits.reduce((a,v)=>a+(v.brand_estratti?.length||0),0);
+  document.getElementById('totBrand').textContent = new Set(visits.flatMap(v=>(v.brand_estratti||[]).map(b=>b.brand))).size;
+  if (!visits.length) { el.innerHTML = '<div class="empty-state">Nessuna visita ancora registrata</div>'; return; }
+  el.innerHTML = visits.slice(0,25).map(v => {
+    const d = new Date(v.data);
+    const dateStr = d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'2-digit'});
+    const brands = (v.brand_estratti||[]).map((b,i)=>`<span class="badge ${BRAND_COLORS[i%BRAND_COLORS.length]}">${b.brand}</span>`).join('');
+    const prom = new Date(d); prom.setDate(prom.getDate()+(v.giorni||10));
+    return `<div class="log-item">
+      <div class="log-header"><span class="log-name">${v.cliente}</span><span class="log-date">${dateStr}</span></div>
+      <div class="log-summary">${(v.riassunto||v.note||'').substring(0,90)}...</div>
+      <div style="margin-bottom:6px;">${brands}</div>
+      <span class="badge badge-blue">📅 ${prom.toLocaleDateString('it-IT',{day:'2-digit',month:'short'})}</span>
+    </div>`;
+  }).join('');
+}
+
+function cancellaStorico() {
+  if (confirm('Cancellare tutto lo storico locale?')) {
+    visits = [];
+    localStorage.removeItem('fieldVisits_v3');
+    showToast('Storico cancellato');
+    renderLog();
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
