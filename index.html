@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Note Visite">
+<link rel="apple-touch-icon" href="/note-visite/icon.png">
+<link rel="icon" href="/note-visite/icon.png">
+<title>Note Visite Pro</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f4f1; --surface: #ffffff; --surface2: #f0efe9;
+  --border: rgba(0,0,0,0.10); --border2: rgba(0,0,0,0.18);
+  --text: #1a1a18; --text2: #6b6b66; --text3: #9b9b94; --accent: #1a1a18;
+  --blue-bg: #e6f1fb; --blue-text: #0c447c;
+  --green-bg: #eaf3de; --green-text: #3b6d11;
+  --amber-bg: #faeeda; --amber-text: #854f0b;
+  --red: #E24B4A; --red-bg: #fcebeb; --red-text: #a32d2d;
+  --teal-bg: #e1f5ee; --teal-text: #0f6e56;
+  --purple-bg: #eeedfe; --purple-text: #533ab7;
+  --radius: 12px; --radius-sm: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1a; --surface: #2a2a27; --surface2: #333330;
+    --border: rgba(255,255,255,0.10); --border2: rgba(255,255,255,0.18);
+    --text: #f0efe9; --text2: #a0a09a; --text3: #6b6b66; --accent: #f0efe9;
+    --blue-bg: #042c53; --blue-text: #85b7eb;
+    --green-bg: #173404; --green-text: #c0dd97;
+    --amber-bg: #412402; --amber-text: #fac775;
+    --red-bg: #501313; --red-text: #f09595;
+    --teal-bg: #04342c; --teal-text: #5dcaa5;
+    --purple-bg: #26215c; --purple-text: #afa9ec;
+  }
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
+header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 16px 20px 12px; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+header div h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+header div p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.drive-status { font-size: 12px; padding: 4px 10px; border-radius: 20px; cursor: pointer; border: none; font-family: inherit; }
+.drive-status.connected { background: var(--green-bg); color: var(--green-text); }
+.drive-status.disconnected { background: var(--amber-bg); color: var(--amber-text); }
+.tab-bar { display: flex; background: var(--surface); border-bottom: 0.5px solid var(--border); overflow-x: auto; }
+.tab { flex: 1; padding: 11px 4px; font-size: 11px; color: var(--text2); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; font-family: inherit; transition: all 0.15s; white-space: nowrap; min-width: 58px; }
+.tab.active { color: var(--text); font-weight: 500; border-bottom-color: var(--accent); }
+.content { padding: 20px 16px; }
+.section { margin-bottom: 20px; }
+label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+input[type=text], input[type=password], textarea { width: 100%; padding: 12px 14px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+input:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; line-height: 1.5; }
+button.primary { width: 100%; padding: 14px; background: var(--accent); color: var(--bg); border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; transition: opacity 0.15s; margin-bottom: 10px; }
+button.primary:active { opacity: 0.8; }
+button.primary.outline { background: var(--surface); color: var(--text); border: 0.5px solid var(--border2); }
+button.secondary { width: 100%; padding: 12px; background: var(--surface); color: var(--text); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; cursor: pointer; }
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.card-sub { font-size: 12px; color: var(--text2); }
+.rec-center { display: flex; flex-direction: column; align-items: center; padding: 16px 0 10px; }
+.rec-btn { width: 72px; height: 72px; border-radius: 50%; border: 1.5px solid var(--border2); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-bottom: 10px; }
+.rec-btn svg { width: 28px; height: 28px; fill: var(--text); }
+.rec-btn.recording { border-color: var(--red); background: var(--red-bg); animation: pulse 1.2s ease-in-out infinite; }
+.rec-btn.recording svg { fill: var(--red-text); }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07)} }
+.rec-status { font-size: 13px; color: var(--text2); text-align: center; }
+.days-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; }
+.days-row span { font-size: 13px; color: var(--text2); white-space: nowrap; }
+.days-row input[type=range] { flex: 1; }
+.days-num { font-size: 16px; font-weight: 600; color: var(--text); min-width: 24px; text-align: center; }
+.status-msg { font-size: 13px; color: var(--text2); text-align: center; padding: 10px 0; min-height: 36px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.spinner { width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--text); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 3px 10px; border-radius: 6px; margin-right: 4px; margin-bottom: 4px; }
+.badge-green { background: var(--green-bg); color: var(--green-text); }
+.badge-blue { background: var(--blue-bg); color: var(--blue-text); }
+.badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+.badge-teal { background: var(--teal-bg); color: var(--teal-text); }
+.badge-purple { background: var(--purple-bg); color: var(--purple-text); }
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; }
+.stat-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.stat-val { font-size: 22px; font-weight: 600; }
+.log-item { border-bottom: 0.5px solid var(--border); padding: 14px 0; }
+.log-item:last-child { border-bottom: none; }
+.log-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.log-name { font-size: 15px; font-weight: 500; }
+.log-date { font-size: 12px; color: var(--text3); }
+.log-summary { font-size: 13px; color: var(--text2); margin-bottom: 8px; line-height: 1.5; }
+.divider { height: 0.5px; background: var(--border); margin: 20px 0; }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 100; opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none; }
+.toast.show { opacity: 1; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 14px; }
+.brand-file-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; }
+.brand-file-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.brand-file-preview { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.report-box { background: var(--surface2); border-radius: var(--radius-sm); padding: 16px; font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; margin-bottom: 16px; }
+.week-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.week-selector button { padding: 8px 14px; background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; color: var(--text); cursor: pointer; }
+.week-selector span { flex: 1; text-align: center; font-size: 14px; font-weight: 500; }
+.upload-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+.upload-ok { color: var(--green-text); }
+.upload-fail { color: var(--red-text); }
+/* SEARCH */
+.search-wrap { position: relative; margin-bottom: 12px; }
+.search-wrap input { padding-left: 38px; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--text3); pointer-events: none; }
+.filter-row { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+.filter-btn { padding: 5px 12px; border-radius: 20px; border: 0.5px solid var(--border2); background: var(--surface); font-size: 12px; color: var(--text2); cursor: pointer; font-family: inherit; white-space: nowrap; }
+.filter-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+/* DASHBOARD */
+.dash-greeting { font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+.dash-date { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+.dash-section { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px; }
+.followup-item { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.followup-left { flex: 1; min-width: 0; }
+.followup-name { font-size: 14px; font-weight: 500; }
+.followup-brands { font-size: 12px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.followup-badge { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.followup-badge.urgent { background: var(--red-bg); color: var(--red-text); }
+.followup-badge.soon { background: var(--amber-bg); color: var(--amber-text); }
+.followup-badge.ok { background: var(--green-bg); color: var(--green-text); }
+.brand-bar-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); }
+.brand-bar-item:last-child { border-bottom: none; }
+.brand-bar-name { font-size: 13px; font-weight: 500; width: 90px; flex-shrink: 0; }
+.brand-bar-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+.brand-bar-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.4s; }
+.brand-bar-count { font-size: 12px; color: var(--text2); min-width: 24px; text-align: right; }
+
+/* CLIENTI */
+.cliente-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s; }
+.cliente-card:active { border-color: var(--accent); }
+.cliente-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.cliente-card-name { font-size: 15px; font-weight: 500; }
+.cliente-card-meta { font-size: 12px; color: var(--text3); }
+.cliente-card-brands { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+.dossier-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; overflow-y: auto; }
+.dossier-overlay.open { display: block; }
+.dossier-header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
+.dossier-back { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text); padding: 0; line-height: 1; }
+.dossier-title { font-size: 17px; font-weight: 600; flex: 1; }
+.dossier-content { padding: 20px 16px 60px; }
+.dossier-section { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px; border-bottom: 0.5px solid var(--border); padding-bottom: 6px; }
+.dossier-brand-block { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 10px; }
+.dossier-brand-name { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.dossier-brand-entry { font-size: 13px; color: var(--text2); padding: 6px 0; border-bottom: 0.5px solid var(--border); line-height: 1.5; }
+.dossier-brand-entry:last-child { border-bottom: none; }
+.entry-date { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+.trend-up { color: var(--green-text); font-size: 12px; font-weight: 500; }
+.trend-flat { color: var(--amber-text); font-size: 12px; font-weight: 500; }
+.trend-down { color: var(--red-text); font-size: 12px; font-weight: 500; }
+.azione-aperta { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; font-size: 13px; border-bottom: 0.5px solid var(--border); }
+.azione-aperta:last-child { border-bottom: none; }
+.pdf-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: var(--accent); color: var(--bg); border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; margin-top: 24px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Note Visite Pro</h1>
+    <p>Multi-brand · Drive · Calendar</p>
+  </div>
+  <button class="drive-status disconnected" id="driveBtn" onclick="driveLogin()">⬤ Drive</button>
+</header>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab" onclick="switchTab('nuova')">+ Visita</button>
+  <button class="tab" onclick="switchTab('storico')">Storico</button>
+  <button class="tab" onclick="switchTab('clienti')">Clienti</button>
+  <button class="tab" onclick="switchTab('report')">Report</button>
+  <button class="tab" onclick="switchTab('impostazioni')">Setup</button>
+</div>
+
+<div class="content">
+
+  <!-- DASHBOARD -->
+  <div id="tab-dashboard">
+    <div class="dash-greeting" id="dashGreeting">Buongiorno</div>
+    <div class="dash-date" id="dashDate"></div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Visite questa settimana</div><div class="stat-val" id="dVisSett">0</div></div>
+      <div class="stat-card"><div class="stat-label">Follow-up imminenti</div><div class="stat-val" id="dScad">0</div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Clienti totali</div><div class="stat-val" id="dClienti">0</div></div>
+      <div class="stat-card"><div class="stat-label">Visite totali</div><div class="stat-val" id="dVisite">0</div></div>
+    </div>
+
+    <div class="dash-section">Follow-up in scadenza</div>
+    <div id="dFollowup"></div>
+
+    <div class="dash-section">Brand per attività</div>
+    <div class="card" style="padding:8px 16px;"><div id="dBrand"></div></div>
+
+    <div class="dash-section">Ultime visite</div>
+    <div id="dUltime"></div>
+  </div>
+
+  <!-- NUOVA VISITA -->
+  <div id="tab-nuova" style="display:none;">
+    <div class="section">
+      <label>Cliente visitato</label>
+      <input type="text" id="cliente" placeholder="es. D'introno, Quartarella, Ellegidue...">
+    </div>
+    <div class="section">
+      <label>Nota vocale</label>
+      <div class="rec-center">
+        <button class="rec-btn" id="recBtn" onclick="toggleRec()">
+          <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/></svg>
+        </button>
+        <div class="rec-status" id="recStatus">Clicca per registrare</div>
+      </div>
+    </div>
+    <div class="section">
+      <label>Oppure scrivi la nota</label>
+      <textarea id="noteText" rows="5" placeholder="Parla liberamente di tutti i brand. Es: 'Su Megius interesse per il 120x120, su Mobilduenne ancora freddi...'"></textarea>
+    </div>
+    <div class="section">
+      <label>Promemoria prossima visita</label>
+      <div class="days-row">
+        <span>Tra</span>
+        <input type="range" min="5" max="30" value="10" step="1" id="daysSlider" oninput="document.getElementById('daysVal').textContent=this.value">
+        <span class="days-num" id="daysVal">10</span>
+        <span>giorni</span>
+      </div>
+    </div>
+    <div id="aiResult" style="display:none;" class="section">
+      <label>File generati per brand</label>
+      <div id="brandFiles"></div>
+      <div id="uploadResults"></div>
+    </div>
+    <div class="status-msg" id="mainStatus"></div>
+    <button class="primary" onclick="elabora()">Elabora · Salva su Drive · Crea promemoria</button>
+  </div>
+
+  <!-- STORICO -->
+  <div id="tab-storico" style="display:none;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Cerca cliente o brand..." oninput="renderLog()">
+    </div>
+    <div class="filter-row" id="filterRow"></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Visite totali</div><div class="stat-val" id="totVisite">0</div></div>
+      <div class="stat-card"><div class="stat-label">Clienti diversi</div><div class="stat-val" id="totClienti">0</div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">File su Drive</div><div class="stat-val" id="totFile">0</div></div>
+      <div class="stat-card"><div class="stat-label">Brand attivi</div><div class="stat-val" id="totBrand">0</div></div>
+    </div>
+    <div id="logList"><div class="empty-state">Nessuna visita ancora registrata</div></div>
+  </div>
+
+  <!-- REPORT -->
+  <div id="tab-report" style="display:none;">
+    <div class="week-selector">
+      <button onclick="changeWeek(-1)">◀</button>
+      <span id="weekLabel">Questa settimana</span>
+      <button onclick="changeWeek(1)">▶</button>
+    </div>
+    <div id="reportResult" style="display:none;">
+      <div class="report-box" id="reportText"></div>
+      <button class="primary" onclick="salvaReportDrive()">Salva report su Drive</button>
+      <button class="primary outline" onclick="copiaReport()">Copia testo</button>
+    </div>
+    <div class="status-msg" id="reportStatus"></div>
+    <button class="primary" onclick="generaReport()">Genera report settimanale</button>
+    <div style="margin-top:16px; font-size:12px; color:var(--text2); line-height:1.6;">Analizza tutte le visite della settimana e genera un riepilogo per brand con risultati, opportunità e azioni prioritarie.</div>
+  </div>
+
+  <!-- SETUP -->
+  <div id="tab-impostazioni" style="display:none;">
+    <div class="card">
+      <div class="card-title">Google Drive & Calendar</div>
+      <div class="card-sub" style="margin-bottom:12px;">Connetti per salvare file e creare promemoria automaticamente.</div>
+      <button class="primary" onclick="driveLogin()" id="driveLoginBtn">Connetti Google</button>
+      <div id="driveInfo" style="font-size:13px; color:var(--text2); margin-top:8px;"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-title">API Key OpenAI</div>
+      <div class="card-sub" style="margin-bottom:12px;">Per trascrizione vocale e AI. Circa 1-2€/mese.</div>
+      <input type="password" id="apiKey" placeholder="sk-...">
+      <div style="margin-top:10px;"><button class="primary" onclick="salvaKey()">Salva API Key</button></div>
+      <div style="font-size:12px; color:var(--text2); margin-top:8px;">Salvata solo sul dispositivo.</div>
+    </div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-title">Brand nel portfolio</div>
+      <div class="card-sub" style="margin-bottom:12px;">Uno per riga. L'AI li riconosce automaticamente.</div>
+      <textarea id="brandList" rows="6" style="font-size:13px;"></textarea>
+      <div style="margin-top:10px;"><button class="primary" onclick="salvaBrand()">Salva brand</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card" style="border-color:rgba(226,75,74,0.2);">
+      <div class="card-title">Dati locali</div>
+      <div class="card-sub" style="margin-bottom:12px;">Storico salvato nel browser.</div>
+      <button class="secondary" onclick="cancellaStorico()" style="color:var(--red-text);">Cancella storico locale</button>
+    </div>
+  </div>
+
+</div>
+
+  <!-- CLIENTI -->
+  <div id="tab-clienti" style="display:none;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="clientiSearch" placeholder="Cerca cliente..." oninput="renderClienti()">
+    </div>
+    <div id="clientiList"><div class="empty-state">Nessun cliente ancora registrato</div></div>
+  </div>
+
+  <!-- DOSSIER OVERLAY -->
+  <div class="dossier-overlay" id="dossierOverlay">
+    <div class="dossier-header">
+      <button class="dossier-back" onclick="chiudiDossier()">←</button>
+      <div class="dossier-title" id="dossierTitolo">Dossier Cliente</div>
+    </div>
+    <div class="dossier-content" id="dossierContent"></div>
+  </div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CLIENT_ID = '861244244527-vtr1oohc8n3pb22ior3g5m7tp1a9u858.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events';
+const DEFAULT_BRANDS = ['Megius','Mobilduenne','Navarti','Zenon','Sichenia','Grespania','Serenissima','CIR','Cerasarda'];
+const BRAND_COLORS = ['badge-blue','badge-teal','badge-amber','badge-purple','badge-green','badge-blue','badge-teal','badge-amber','badge-purple'];
+
+let tokenClient=null, accessToken=localStorage.getItem('drive_token')||null;
+let tokenExpiry=parseInt(localStorage.getItem('drive_token_expiry')||'0');
+let mediaRecorder=null, audioChunks=[], isRecording=false;
+let visits=JSON.parse(localStorage.getItem('fieldVisits_v3')||'[]');
+let savedKey=localStorage.getItem('openai_key')||'';
+let brandList=JSON.parse(localStorage.getItem('brandList')||JSON.stringify(DEFAULT_BRANDS));
+let currentWeekOffset=0, lastReport='', activeFilter='tutti';
+
+function init() {
+  if (savedKey) document.getElementById('apiKey').value = savedKey;
+  document.getElementById('brandList').value = brandList.join('\n');
+  updateDriveUI();
+  loadGIS();
+  renderDashboard();
+}
+
+function loadGIS() {
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = () => {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID, scope: SCOPES,
+      callback: (resp) => {
+        if (resp.error) { showToast('Errore: '+resp.error); return; }
+        accessToken = resp.access_token;
+        tokenExpiry = Date.now() + resp.expires_in * 1000;
+        localStorage.setItem('drive_token', accessToken);
+        localStorage.setItem('drive_token_expiry', tokenExpiry);
+        updateDriveUI();
+        showToast('Google connesso ✓');
+      }
+    });
+  };
+  document.head.appendChild(s);
+}
+
+function isTokenValid() { return accessToken && Date.now() < tokenExpiry - 60000; }
+
+function driveLogin() {
+  if (!tokenClient) { showToast('Caricamento...'); return; }
+  if (isTokenValid()) {
+    accessToken=null;
+    localStorage.removeItem('drive_token'); localStorage.removeItem('drive_token_expiry');
+    updateDriveUI(); showToast('Disconnesso'); return;
+  }
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function updateDriveUI() {
+  const ok = isTokenValid();
+  document.getElementById('driveBtn').className = 'drive-status ' + (ok?'connected':'disconnected');
+  document.getElementById('driveBtn').textContent = '⬤ Drive';
+  const lb = document.getElementById('driveLoginBtn');
+  const info = document.getElementById('driveInfo');
+  if (lb) lb.textContent = ok ? 'Disconnetti' : 'Connetti Google';
+  if (info) info.textContent = ok ? '✓ Connesso — Drive e Calendar attivi.' : 'Non connesso.';
+}
+
+// ── DASHBOARD ──────────────────────────────────────────
+function renderDashboard() {
+  const ora = new Date().getHours();
+  document.getElementById('dashGreeting').textContent = ora<12?'Buongiorno':ora<18?'Buon pomeriggio':'Buonasera';
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const { monday, sunday } = getWeekRange(0);
+  const visSett = visits.filter(v=>{ const d=new Date(v.data); return d>=monday&&d<=sunday; });
+
+  const prossimi = visits.map(v=>{
+    const prom=new Date(v.data); prom.setDate(prom.getDate()+(v.giorni||10));
+    const diff=Math.ceil((prom-oggi)/86400000);
+    return {...v, diff, prom};
+  }).filter(v=>v.diff>=-1&&v.diff<=14).sort((a,b)=>a.diff-b.diff);
+
+  document.getElementById('dVisSett').textContent = visSett.length;
+  document.getElementById('dScad').textContent = prossimi.filter(v=>v.diff<=3).length;
+  document.getElementById('dClienti').textContent = new Set(visits.map(v=>v.cliente)).size;
+  document.getElementById('dVisite').textContent = visits.length;
+
+  // follow-up
+  const fEl = document.getElementById('dFollowup');
+  if (!prossimi.length) {
+    fEl.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:6px 0 12px;">Nessun follow-up imminente ✓</div>';
+  } else {
+    fEl.innerHTML = prossimi.slice(0,6).map(v=>{
+      const cls = v.diff<=2?'urgent':v.diff<=5?'soon':'ok';
+      const lbl = v.diff<0?`Scaduto ${Math.abs(v.diff)}gg fa`:v.diff===0?'Oggi':v.diff===1?'Domani':`Tra ${v.diff}gg`;
+      const brands=(v.brand_estratti||[]).map(b=>b.brand).join(', ')||'—';
+      return `<div class="followup-item">
+        <div class="followup-left">
+          <div class="followup-name">${v.cliente}</div>
+          <div class="followup-brands">${brands}</div>
+        </div>
+        <span class="followup-badge ${cls}">${lbl}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // brand bar chart
+  const bc={};
+  visits.forEach(v=>(v.brand_estratti||[]).forEach(b=>{ bc[b.brand]=(bc[b.brand]||0)+1; }));
+  const bs=Object.entries(bc).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const mx=bs[0]?.[1]||1;
+  const bEl=document.getElementById('dBrand');
+  bEl.innerHTML = bs.length ? bs.map(([brand,cnt])=>`
+    <div class="brand-bar-item">
+      <div class="brand-bar-name">${brand}</div>
+      <div class="brand-bar-track"><div class="brand-bar-fill" style="width:${Math.round(cnt/mx*100)}%"></div></div>
+      <div class="brand-bar-count">${cnt}</div>
+    </div>`).join('') : '<div style="font-size:13px;color:var(--text2);padding:8px 0;">Nessun dato</div>';
+
+  // ultime visite
+  const uEl=document.getElementById('dUltime');
+  uEl.innerHTML = visits.length ? visits.slice(0,3).map(v=>{
+    const d=new Date(v.data);
+    const ds=d.toLocaleDateString('it-IT',{day:'2-digit',month:'short'});
+    const brands=(v.brand_estratti||[]).map((b,i)=>`<span class="badge ${BRAND_COLORS[i%BRAND_COLORS.length]}">${b.brand}</span>`).join('');
+    return `<div class="log-item">
+      <div class="log-header"><span class="log-name">${v.cliente}</span><span class="log-date">${ds}</span></div>
+      <div class="log-summary">${(v.riassunto||v.note||'').substring(0,80)}...</div>
+      <div>${brands}</div>
+    </div>`;
+  }).join('') : '<div style="font-size:13px;color:var(--text2);padding:8px 0;">Nessuna visita ancora</div>';
+}
+
+// ── SEARCH & FILTER ────────────────────────────────────
+function buildFilterButtons() {
+  const brands=[...new Set(visits.flatMap(v=>(v.brand_estratti||[]).map(b=>b.brand)))];
+  document.getElementById('filterRow').innerHTML =
+    `<button class="filter-btn ${activeFilter==='tutti'?'active':''}" onclick="setFilter('tutti')">Tutti</button>` +
+    brands.map(b=>`<button class="filter-btn ${activeFilter===b?'active':''}" onclick="setFilter('${b}')">${b}</button>`).join('');
+}
+
+function setFilter(val) {
+  activeFilter=val;
+  buildFilterButtons();
+  renderLog();
+}
+
+// ── TAB SWITCH ─────────────────────────────────────────
+function switchTab(name) {
+  ['dashboard','nuova','storico','clienti','report','impostazioni'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach((b,i)=>{
+    b.classList.toggle('active',['dashboard','nuova','storico','clienti','report','impostazioni'][i]===name);
+  });
+  if (name==='dashboard') renderDashboard();
+  if (name==='storico') { buildFilterButtons(); renderLog(); }
+  if (name==='clienti') renderClienti();
+  if (name==='report') updateWeekLabel();
+}
+
+function salvaKey() {
+  const k=document.getElementById('apiKey').value.trim();
+  if (!k.startsWith('sk-')) { showToast('API key deve iniziare con sk-'); return; }
+  localStorage.setItem('openai_key',k); savedKey=k; showToast('API key salvata ✓');
+}
+
+function salvaBrand() {
+  brandList=document.getElementById('brandList').value.split('\n').map(b=>b.trim()).filter(Boolean);
+  localStorage.setItem('brandList',JSON.stringify(brandList)); showToast('Brand salvati ✓');
+}
+
+async function toggleRec() { if (isRecording) stopRec(); else startRec(); }
+
+async function startRec() {
+  if (!savedKey) { showToast('Inserisci la API key nel Setup'); return; }
+  try {
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream); audioChunks=[];
+    mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+    mediaRecorder.onstop=transcribeAudio;
+    mediaRecorder.start(); isRecording=true;
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('recBtn').innerHTML=`<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+    document.getElementById('recStatus').textContent='Registrazione... clicca per fermare';
+  } catch(e) { showToast('Microfono non disponibile'); }
+}
+
+function stopRec() {
+  if (mediaRecorder) mediaRecorder.stop(); isRecording=false;
+  document.getElementById('recBtn').classList.remove('recording');
+  document.getElementById('recBtn').innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/></svg>`;
+  document.getElementById('recStatus').textContent='Trascrizione in corso...';
+}
+
+async function transcribeAudio() {
+  const blob=new Blob(audioChunks,{type:'audio/webm'});
+  const fd=new FormData(); fd.append('file',blob,'audio.webm'); fd.append('model','whisper-1'); fd.append('language','it');
+  try {
+    const res=await fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{'Authorization':'Bearer '+savedKey},body:fd});
+    const data=await res.json();
+    if (data.text) { document.getElementById('noteText').value=data.text; document.getElementById('recStatus').textContent='Trascrizione completata ✓'; showToast('Audio trascritto ✓'); }
+    else document.getElementById('recStatus').textContent='Errore trascrizione';
+  } catch(e) { showToast('Errore trascrizione'); }
+}
+
+async function elabora() {
+  const cliente=document.getElementById('cliente').value.trim();
+  const note=document.getElementById('noteText').value.trim();
+  const giorni=parseInt(document.getElementById('daysSlider').value);
+  if (!cliente) { showToast('Inserisci il nome del cliente'); return; }
+  if (!note) { showToast('Inserisci una nota o registra un audio'); return; }
+  if (!savedKey) { showToast('Inserisci la API key nel Setup'); return; }
+
+  setStatus(true,'AI in ascolto... estrazione brand e note');
+  try {
+    const oggi=new Date();
+    const dateStr=oggi.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+    const meseStr=oggi.toLocaleDateString('it-IT',{month:'long'});
+    const annoStr=oggi.getFullYear().toString();
+
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+savedKey},
+      body:JSON.stringify({
+        model:'gpt-4o-mini', response_format:{type:'json_object'},
+        messages:[
+          {role:'system',content:`Sei l'assistente di un agente commerciale nel settore materiali edili e arredo bagno.
+I brand del portfolio: ${brandList.join(', ')}.
+Estrai info per ogni brand menzionato. Rispondi SOLO con JSON:
+{"riassunto_visita":"1-2 righe","titolo_calendario":"Revisita [Cliente] max 60 car","brand_estratti":[{"brand":"Nome","situazione":"...","interesse":"alto|medio|basso|neutro","punti":["..."],"azioni":["..."],"nome_file":"Cliente_Brand_GiornoMese.txt"}]}
+Se nessun brand menzionato usa brand "Generale".`},
+          {role:'user',content:`Cliente: ${cliente}\nData: ${dateStr}\nNote: ${note}`}
+        ]
+      })
+    });
+    const data=await res.json();
+    const raw=data.choices?.[0]?.message?.content||'{}';
+    let parsed; try { parsed=JSON.parse(raw); } catch(e){parsed=null;}
+    if (!parsed?.brand_estratti) { setStatus(false,'Errore elaborazione AI'); return; }
+
+    const brandFiles=parsed.brand_estratti.map(b=>({...b,contenuto:generaFile(cliente,dateStr,parsed.riassunto_visita,b,note)}));
+    renderBrandFiles(brandFiles);
+    document.getElementById('aiResult').style.display='block';
+
+    const visit={id:Date.now(),cliente,data:oggi.toISOString(),note,riassunto:parsed.riassunto_visita,brand_estratti:parsed.brand_estratti,giorni};
+    visits.unshift(visit);
+    localStorage.setItem('fieldVisits_v3',JSON.stringify(visits));
+
+    if (isTokenValid()) {
+      setStatus(true,`Salvataggio ${brandFiles.length} file su Drive...`);
+      try {
+        const rootId=await getOrCreateFolder('Note Visite');
+        const annoId=await getOrCreateFolder(annoStr,rootId);
+        const meseId=await getOrCreateFolder(meseStr,annoId);
+        const results=[];
+        for (const f of brandFiles) { const ok=await uploadFileToDrive(f.nome_file,f.contenuto,meseId); results.push({nome:f.nome_file,ok}); }
+        renderUploadResults(results);
+        setStatus(false,`✓ ${results.filter(r=>r.ok).length}/${brandFiles.length} file salvati su Drive`);
+      } catch(e) { setStatus(false,'⚠ Errore Drive: '+e.message); }
+    } else { setStatus(false,'Drive non connesso — Connetti nel Setup.'); }
+
+    const dataPromemoria=new Date(oggi); dataPromemoria.setDate(dataPromemoria.getDate()+giorni);
+    await creaEventoCalendar(cliente,parsed.titolo_calendario,parsed.riassunto_visita,parsed.brand_estratti,oggi,dataPromemoria);
+
+    document.getElementById('cliente').value='';
+    document.getElementById('noteText').value='';
+    document.getElementById('recStatus').textContent='Clicca per registrare';
+    document.getElementById('aiResult').style.display='none';
+    document.getElementById('uploadResults').innerHTML='';
+
+  } catch(e) { setStatus(false,'Errore: '+e.message); }
+}
+
+function generaFile(cliente,data,riassunto,brand,noteOriginali) {
+  return [`NOTA VISITA`,`═══════════════════════════════════`,`Cliente:   ${cliente}`,`Brand:     ${brand.brand}`,`Data:      ${data}`,`Interesse: ${brand.interesse.toUpperCase()}`,``,`SITUAZIONE`,`───────────`,brand.situazione,``,`PUNTI CHIAVE`,`───────────`,...(brand.punti||[]).map(p=>`• ${p}`),``,`AZIONI DA FARE`,`───────────`,...(brand.azioni||[]).map(a=>`→ ${a}`),``,`NOTE ORIGINALI`,`───────────`,noteOriginali,``,`───────────────────────────────────`,`Generato il ${data} — Note Visite Pro`].join('\n');
+}
+
+function renderBrandFiles(bf) {
+  document.getElementById('brandFiles').innerHTML=bf.map((b,i)=>{
+    const c=BRAND_COLORS[i%BRAND_COLORS.length];
+    const ic={alto:'badge-green',medio:'badge-amber',basso:'badge-teal',neutro:'badge-blue'}[b.interesse]||'badge-blue';
+    return `<div class="brand-file-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span class="badge ${c}">${b.brand}</span><span class="badge ${ic}">interesse ${b.interesse}</span></div><div class="brand-file-name">${b.nome_file}</div><div class="brand-file-preview">${(b.situazione||'').substring(0,80)}...</div>${b.azioni?.length?`<div style="font-size:12px;color:var(--text2);margin-top:4px;">→ ${b.azioni[0]}</div>`:''}</div>`;
+  }).join('');
+}
+
+function renderUploadResults(results) {
+  document.getElementById('uploadResults').innerHTML=results.map(r=>`<div class="upload-row"><span style="font-size:12px;">${r.nome}</span><span class="${r.ok?'upload-ok':'upload-fail'}">${r.ok?'✓ Salvato':'✗ Errore'}</span></div>`).join('');
+}
+
+async function getOrCreateFolder(name,parentId=null) {
+  let q=`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  if (parentId) q+=` and '${parentId}' in parents`;
+  const res=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`,{headers:{'Authorization':'Bearer '+accessToken}});
+  const data=await res.json();
+  if (data.files?.length>0) return data.files[0].id;
+  const meta={name,mimeType:'application/vnd.google-apps.folder'};
+  if (parentId) meta.parents=[parentId];
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify(meta)});
+  return (await cr.json()).id;
+}
+
+async function uploadFileToDrive(nome,contenuto,folderId) {
+  const boundary='notevisite_boundary';
+  const meta=JSON.stringify({name:nome,parents:[folderId],mimeType:'text/plain'});
+  const body=`--${boundary}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${contenuto}\r\n--${boundary}--`;
+  const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':`multipart/related; boundary=${boundary}`},body});
+  return res.ok;
+}
+
+async function creaEventoCalendar(cliente,titolo,riassunto,brand_estratti,dataVisita,dataPromemoria) {
+  if (!isTokenValid()) { showToast('Connetti Drive per il promemoria Calendar'); return; }
+  const y=dataPromemoria.getFullYear(), m=String(dataPromemoria.getMonth()+1).padStart(2,'0'), d=String(dataPromemoria.getDate()).padStart(2,'0');
+  const descrizione=[`📅 Visita: ${dataVisita.toLocaleDateString('it-IT')}`,``,`📋 ${riassunto}`,``,`Brand: ${(brand_estratti||[]).map(b=>b.brand).join(', ')}`,``,`Azioni:`,...(brand_estratti||[]).flatMap(b=>(b.azioni||[]).map(a=>`→ [${b.brand}] ${a}`))].join('\n');
+  const evento={summary:titolo||`Revisita ${cliente}`,description:descrizione,start:{date:`${y}-${m}-${d}`},end:{date:`${y}-${m}-${d}`},reminders:{useDefault:false,overrides:[{method:'popup',minutes:9*60}]}};
+  try {
+    const res=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify(evento)});
+    if (res.ok) showToast(`📅 Promemoria ${dataPromemoria.toLocaleDateString('it-IT')} ✓`);
+    else { const e=await res.json(); showToast('Errore Calendar: '+(e.error?.message||'?')); }
+  } catch(e) { showToast('Errore Calendar: '+e.message); }
+}
+
+function getWeekRange(offset) {
+  const now=new Date(), day=now.getDay(), diff=day===0?-6:1-day;
+  const monday=new Date(now); monday.setDate(now.getDate()+diff+(offset*7)); monday.setHours(0,0,0,0);
+  const sunday=new Date(monday); sunday.setDate(monday.getDate()+6); sunday.setHours(23,59,59,999);
+  return {monday,sunday};
+}
+
+function updateWeekLabel() {
+  const {monday,sunday}=getWeekRange(currentWeekOffset);
+  const opts={day:'2-digit',month:'short'};
+  if (currentWeekOffset===0) document.getElementById('weekLabel').textContent='Questa settimana';
+  else if (currentWeekOffset===-1) document.getElementById('weekLabel').textContent='Settimana scorsa';
+  else document.getElementById('weekLabel').textContent=`${monday.toLocaleDateString('it-IT',opts)} – ${sunday.toLocaleDateString('it-IT',opts)}`;
+}
+
+function changeWeek(dir) {
+  currentWeekOffset+=dir; if (currentWeekOffset>0) currentWeekOffset=0;
+  updateWeekLabel(); document.getElementById('reportResult').style.display='none'; setReportStatus(false,'');
+}
+
+async function generaReport() {
+  const {monday,sunday}=getWeekRange(currentWeekOffset);
+  const visiteSett=visits.filter(v=>{const d=new Date(v.data);return d>=monday&&d<=sunday;});
+  if (!visiteSett.length) { setReportStatus(false,'Nessuna visita in questa settimana.'); return; }
+  if (!savedKey) { showToast('Inserisci la API key nel Setup'); return; }
+  setReportStatus(true,`Analisi di ${visiteSett.length} visite...`);
+  const riepilogo=visiteSett.map(v=>{
+    const brands=(v.brand_estratti||[]).map(b=>`  - ${b.brand}: ${b.situazione||''} (interesse: ${b.interesse||'nd'})`).join('\n');
+    return `Cliente: ${v.cliente} — ${new Date(v.data).toLocaleDateString('it-IT')}\n${brands||'  - '+v.note}`;
+  }).join('\n\n');
+  try {
+    const periodoStr=`${monday.toLocaleDateString('it-IT')} – ${sunday.toLocaleDateString('it-IT')}`;
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+savedKey},body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:`Sei l'assistente di un agente commerciale nel settore materiali edili e arredo bagno. Genera un report settimanale professionale. Struttura: 1. Intestazione con periodo e numeri 2. Riepilogo per brand 3. Top opportunità 4. Azioni prioritarie settimana prossima 5. Segnali di attenzione. Stile: diretto, italiano. Usa simboli (•, →, ✓, ⚠).`},{role:'user',content:`Periodo: ${periodoStr}\n\nVisite:\n\n${riepilogo}`}]})});
+    const data=await res.json();
+    lastReport=data.choices?.[0]?.message?.content||'';
+    if (!lastReport) { setReportStatus(false,'Errore generazione report'); return; }
+    document.getElementById('reportText').textContent=lastReport;
+    document.getElementById('reportResult').style.display='block';
+    setReportStatus(false,'');
+  } catch(e) { setReportStatus(false,'Errore: '+e.message); }
+}
+
+async function salvaReportDrive() {
+  if (!lastReport||!isTokenValid()) { showToast('Connetti Drive nel Setup'); return; }
+  const {monday}=getWeekRange(currentWeekOffset);
+  const nomeFile=`Report_${monday.toLocaleDateString('it-IT').replace(/\//g,'-')}.txt`;
+  try {
+    const rootId=await getOrCreateFolder('Note Visite');
+    const repId=await getOrCreateFolder('Report',rootId);
+    const ok=await uploadFileToDrive(nomeFile,lastReport,repId);
+    showToast(ok?'Report salvato su Drive ✓':'Errore salvataggio');
+  } catch(e) { showToast('Errore: '+e.message); }
+}
+
+function copiaReport() {
+  if (!lastReport) return;
+  navigator.clipboard.writeText(lastReport).then(()=>showToast('Report copiato ✓'));
+}
+
+function setStatus(loading,msg) { document.getElementById('mainStatus').innerHTML=loading?`<div class="spinner"></div>${msg}`:msg; }
+function setReportStatus(loading,msg) { document.getElementById('reportStatus').innerHTML=loading?`<div class="spinner"></div>${msg}`:msg; }
+
+function renderLog() {
+  const query=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();
+  let filtered=visits;
+  if (activeFilter!=='tutti') filtered=filtered.filter(v=>(v.brand_estratti||[]).some(b=>b.brand===activeFilter));
+  if (query) filtered=filtered.filter(v=>v.cliente.toLowerCase().includes(query)||(v.riassunto||'').toLowerCase().includes(query)||(v.note||'').toLowerCase().includes(query)||(v.brand_estratti||[]).some(b=>b.brand.toLowerCase().includes(query)));
+
+  document.getElementById('totVisite').textContent=visits.length;
+  document.getElementById('totClienti').textContent=new Set(visits.map(v=>v.cliente)).size;
+  document.getElementById('totFile').textContent=visits.reduce((a,v)=>a+(v.brand_estratti?.length||0),0);
+  document.getElementById('totBrand').textContent=new Set(visits.flatMap(v=>(v.brand_estratti||[]).map(b=>b.brand))).size;
+
+  const el=document.getElementById('logList');
+  if (!filtered.length) { el.innerHTML=`<div class="empty-state">${query||activeFilter!=='tutti'?'Nessun risultato':'Nessuna visita ancora registrata'}</div>`; return; }
+  el.innerHTML=filtered.slice(0,30).map(v=>{
+    const d=new Date(v.data);
+    const ds=d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'2-digit'});
+    const brands=(v.brand_estratti||[]).map((b,i)=>`<span class="badge ${BRAND_COLORS[i%BRAND_COLORS.length]}">${b.brand}</span>`).join('');
+    const prom=new Date(d); prom.setDate(prom.getDate()+(v.giorni||10));
+    return `<div class="log-item"><div class="log-header"><span class="log-name">${v.cliente}</span><span class="log-date">${ds}</span></div><div class="log-summary">${(v.riassunto||v.note||'').substring(0,90)}...</div><div style="margin-bottom:6px;">${brands}</div><span class="badge badge-blue">📅 ${prom.toLocaleDateString('it-IT',{day:'2-digit',month:'short'})}</span></div>`;
+  }).join('');
+}
+
+function cancellaStorico() {
+  if (confirm('Cancellare tutto lo storico locale?')) {
+    visits=[]; localStorage.removeItem('fieldVisits_v3');
+    showToast('Storico cancellato'); renderLog(); renderDashboard();
+  }
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── CLIENTI & DOSSIER ──────────────────────────────────
+function renderClienti() {
+  const query = (document.getElementById('clientiSearch')?.value||'').toLowerCase().trim();
+  const clientiMap = {};
+  visits.forEach(v => {
+    if (!clientiMap[v.cliente]) clientiMap[v.cliente] = [];
+    clientiMap[v.cliente].push(v);
+  });
+  let clienti = Object.entries(clientiMap).sort((a,b)=>b[1].length-a[1].length);
+  if (query) clienti = clienti.filter(([nome])=>nome.toLowerCase().includes(query));
+  const el = document.getElementById('clientiList');
+  if (!clienti.length) { el.innerHTML='<div class="empty-state">Nessun cliente trovato</div>'; return; }
+  el.innerHTML = clienti.map(([nome, visite], idx) => {
+    const ultima = new Date(visite[0].data);
+    const ultimaStr = ultima.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'2-digit'});
+    const brands = [...new Set(visite.flatMap(v=>(v.brand_estratti||[]).map(b=>b.brand)))];
+    const brandBadges = brands.slice(0,4).map((b,i)=>`<span class="badge ${BRAND_COLORS[i%BRAND_COLORS.length]}">${b}</span>`).join('');
+    return `<div class="cliente-card" onclick="apriDossierByIndex(${idx})">
+      <div class="cliente-card-header">
+        <span class="cliente-card-name">${nome}</span>
+        <span class="cliente-card-meta">${visite.length} ${visite.length===1?'visita':'visite'}</span>
+      </div>
+      <div class="cliente-card-brands">Ultima: ${ultimaStr}</div>
+      <div style="margin-top:6px;">${brandBadges}</div>
+    </div>`;
+  }).join('');
+}
+
+function calcolaTendenza(entries) {
+  if (entries.length < 2) return 'stabile';
+  const map = {alto:3,medio:2,basso:1,neutro:0};
+  const primo = map[entries[0].interesse]||0;
+  const ultimo = map[entries[entries.length-1].interesse]||0;
+  if (ultimo > primo) return 'crescente';
+  if (ultimo < primo) return 'calante';
+  return 'stabile';
+}
+
+function tendenzaHtml(t) {
+  if (t==='crescente') return '<span class="trend-up">↑ Crescente</span>';
+  if (t==='calante') return '<span class="trend-down">↓ Calante</span>';
+  return '<span class="trend-flat">→ Stabile</span>';
+}
+
+function getClientiList() {
+  const clientiMap = {};
+  visits.forEach(v => {
+    if (!clientiMap[v.cliente]) clientiMap[v.cliente] = [];
+    clientiMap[v.cliente].push(v);
+  });
+  return Object.entries(clientiMap).sort((a,b)=>b[1].length-a[1].length);
+}
+
+function apriDossierByIndex(idx) {
+  const clienti = getClientiList();
+  if (clienti[idx]) apriDossier(clienti[idx][0]);
+}
+
+function apriDossier(nome) {
+  const visite = visits.filter(v=>v.cliente===nome).sort((a,b)=>new Date(a.data)-new Date(b.data));
+  document.getElementById('dossierTitolo').textContent = nome;
+
+  const brandMap = {};
+  visite.forEach(v => {
+    (v.brand_estratti||[]).forEach(b => {
+      if (!brandMap[b.brand]) brandMap[b.brand] = [];
+      brandMap[b.brand].push({ data: v.data, interesse: b.interesse, situazione: b.situazione, azioni: b.azioni||[], punti: b.punti||[] });
+    });
+  });
+
+  const azioniAperte = [];
+  Object.entries(brandMap).forEach(([brand, entries]) => {
+    const ultima = entries[entries.length-1];
+    (ultima.azioni||[]).forEach(a => azioniAperte.push({brand, azione: a}));
+  });
+
+  const primaVisita = new Date(visite[0].data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const ultimaVisita = new Date(visite[visite.length-1].data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const interesseColore = {alto:'badge-green',medio:'badge-amber',basso:'badge-teal',neutro:'badge-blue'};
+
+  let html = `
+    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;margin-bottom:4px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">Prima visita</div><div style="font-size:13px;font-weight:500;">${primaVisita}</div></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">Ultima visita</div><div style="font-size:13px;font-weight:500;">${ultimaVisita}</div></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">Visite totali</div><div style="font-size:22px;font-weight:600;">${visite.length}</div></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">Brand trattati</div><div style="font-size:22px;font-weight:600;">${Object.keys(brandMap).length}</div></div>
+      </div>
+    </div>`;
+
+  if (azioniAperte.length) {
+    html += `<div class="dossier-section">Azioni aperte</div>`;
+    html += azioniAperte.map(a=>`<div class="azione-aperta"><span style="color:var(--accent);font-weight:600;">→</span><span><strong>[${a.brand}]</strong> ${a.azione}</span></div>`).join('');
+  }
+
+  html += `<div class="dossier-section">Storico per brand</div>`;
+  Object.entries(brandMap).forEach(([brand, entries]) => {
+    const tendenza = calcolaTendenza(entries);
+    html += `<div class="dossier-brand-block">
+      <div class="dossier-brand-name"><span>${brand}</span>${tendenzaHtml(tendenza)}</div>`;
+    [...entries].reverse().forEach(e => {
+      const d = new Date(e.data).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'2-digit'});
+      html += `<div class="dossier-brand-entry">
+        <div class="entry-date">${d} &middot; <span class="${interesseColore[e.interesse]||'badge-blue'}" style="font-size:11px;padding:1px 6px;border-radius:4px;display:inline-block;">${e.interesse}</span></div>
+        <div>${e.situazione||''}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `<div class="dossier-section">Cronologia visite</div>`;
+  html += [...visite].reverse().map(v=>{
+    const d = new Date(v.data).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'2-digit'});
+    const brands = (v.brand_estratti||[]).map(b=>b.brand).join(', ')||'—';
+    return `<div class="log-item"><div class="log-header"><span style="font-size:13px;font-weight:500;">${d}</span><span style="font-size:12px;color:var(--text3);">${brands}</span></div><div class="log-summary">${(v.riassunto||v.note||'').substring(0,120)}...</div></div>`;
+  }).join('');
+
+  html += `<button class="pdf-btn" onclick="scaricaPDFBase64('${btoa(unescape(encodeURIComponent(nome)))}')"> Scarica Dossier PDF</button>`;
+
+  document.getElementById('dossierContent').innerHTML = html;
+  document.getElementById('dossierOverlay').classList.add('open');
+  document.getElementById('dossierOverlay').scrollTop = 0;
+}
+
+function chiudiDossier() {
+  document.getElementById('dossierOverlay').classList.remove('open');
+}
+
+function scaricaPDFBase64(b64nome) {
+  try {
+    const nome = decodeURIComponent(escape(atob(b64nome)));
+    scaricaPDF(nome);
+  } catch(e) { showToast('Errore decodifica nome'); }
+}
+
+function scaricaPDF(nome) {
+  const visite = visits.filter(v=>v.cliente===nome).sort((a,b)=>new Date(a.data)-new Date(b.data));
+  const brandMap = {};
+  visite.forEach(v => {
+    (v.brand_estratti||[]).forEach(b => {
+      if (!brandMap[b.brand]) brandMap[b.brand] = [];
+      brandMap[b.brand].push({ data: v.data, interesse: b.interesse, situazione: b.situazione, azioni: b.azioni||[] });
+    });
+  });
+
+  const primaVisita = new Date(visite[0].data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const ultimaVisita = new Date(visite[visite.length-1].data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const oggi = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+
+  const azioniAperte = [];
+  Object.entries(brandMap).forEach(([brand, entries]) => {
+    const ultima = entries[entries.length-1];
+    (ultima.azioni||[]).forEach(a => azioniAperte.push({brand, azione: a}));
+  });
+
+  let brandsHtml = '';
+  Object.entries(brandMap).forEach(([brand, entries]) => {
+    const tend = calcolaTendenza(entries);
+    const tendLabel = tend==='crescente'?'↑ Crescente':tend==='calante'?'↓ Calante':'→ Stabile';
+    const tendColor = tend==='crescente'?'#3b6d11':tend==='calante'?'#a32d2d':'#854f0b';
+    brandsHtml += `<div style="margin-bottom:16px;padding:14px;background:#f8f8f6;border-radius:8px;border-left:3px solid #1a1a18;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong style="font-size:14px;">${brand}</strong>
+        <span style="font-size:12px;color:${tendColor};font-weight:500;">${tendLabel}</span>
+      </div>`;
+    [...entries].reverse().forEach(e => {
+      const d = new Date(e.data).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'2-digit'});
+      const iColor = {alto:'#3b6d11',medio:'#854f0b',basso:'#0f6e56',neutro:'#0c447c'}[e.interesse]||'#666';
+      brandsHtml += `<div style="padding:6px 0;border-bottom:0.5px solid #e8e8e0;font-size:12px;">
+        <span style="color:#999;margin-right:8px;">${d}</span>
+        <span style="background:#e8e8e4;padding:1px 7px;border-radius:4px;font-size:11px;color:${iColor};margin-right:8px;">${e.interesse}</span>
+        <span style="color:#444;">${e.situazione||''}</span>
+      </div>`;
+    });
+    brandsHtml += `</div>`;
+  });
+
+  const azioniHtml = azioniAperte.length
+    ? azioniAperte.map(a=>`<div style="padding:6px 0;font-size:13px;border-bottom:0.5px solid #eee;">→ <strong>[${a.brand}]</strong> ${a.azione}</div>`).join('')
+    : '<div style="font-size:13px;color:#999;">Nessuna azione aperta</div>';
+
+  const cronologiaHtml = [...visite].reverse().map(v=>{
+    const d = new Date(v.data).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'2-digit'});
+    const brands = (v.brand_estratti||[]).map(b=>b.brand).join(', ')||'—';
+    return `<div style="padding:8px 0;border-bottom:0.5px solid #eee;font-size:12px;">
+      <div style="font-weight:500;margin-bottom:2px;">${d} &middot; ${brands}</div>
+      <div style="color:#666;">${(v.riassunto||v.note||'').substring(0,150)}</div>
+    </div>`;
+  }).join('');
+
+  const pdfHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Dossier ${nome}</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #1a1a18; font-size: 13px; }
+  h1 { font-size: 14px; color: #666; margin: 0 0 6px; font-weight: normal; text-transform: uppercase; letter-spacing: 1px; }
+  h2 { font-size: 26px; margin: 0 0 4px; }
+  .meta { font-size: 12px; color: #999; margin-bottom: 30px; }
+  .divider { border: none; border-top: 2px solid #1a1a18; margin: 0 0 24px; }
+  .section { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin: 24px 0 10px; border-bottom: 0.5px solid #ddd; padding-bottom: 5px; }
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 4px; }
+  .stat { background: #f5f4f1; padding: 12px; border-radius: 8px; }
+  .stat-val { font-size: 22px; font-weight: 700; }
+  .stat-lbl { font-size: 10px; color: #888; margin-top: 2px; }
+  .footer { margin-top: 40px; padding-top: 12px; border-top: 0.5px solid #ddd; font-size: 10px; color: #aaa; text-align: center; }
+  @media print { body { padding: 20px; } button { display: none; } }
+</style>
+</head><body>
+<h1>Dossier Cliente</h1>
+<h2>${nome}</h2>
+<div class="meta">Generato il ${oggi} &middot; Note Visite Pro</div>
+<hr class="divider">
+
+<div class="section">Riepilogo</div>
+<div class="stats">
+  <div class="stat"><div class="stat-val">${visite.length}</div><div class="stat-lbl">Visite totali</div></div>
+  <div class="stat"><div class="stat-val">${Object.keys(brandMap).length}</div><div class="stat-lbl">Brand trattati</div></div>
+  <div class="stat"><div class="stat-val" style="font-size:13px;margin-top:4px;">${primaVisita}</div><div class="stat-lbl">Prima visita</div></div>
+  <div class="stat"><div class="stat-val" style="font-size:13px;margin-top:4px;">${ultimaVisita}</div><div class="stat-lbl">Ultima visita</div></div>
+</div>
+
+<div class="section">Azioni aperte</div>
+${azioniHtml}
+
+<div class="section">Storico per brand</div>
+${brandsHtml}
+
+<div class="section">Cronologia visite</div>
+${cronologiaHtml}
+
+<div class="footer">Note Visite Pro &middot; Dossier generato automaticamente</div>
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  if (!win) { showToast('Abilita i popup per scaricare il PDF'); return; }
+  win.document.write(pdfHtml);
+  win.document.close();
+  setTimeout(() => win.print(), 600);
+}
+
+
+init();
+</script>
+</body>
+</html>
