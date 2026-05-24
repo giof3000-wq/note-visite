@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Note Visite Pro — Admin</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f8fc; --surface: #ffffff; --surface2: #eef3f9;
+  --border: rgba(24,95,165,0.12); --border2: rgba(24,95,165,0.25);
+  --text: #0c2340; --text2: #4a6a8a; --text3: #8aaac8;
+  --accent: #185FA5; --accent2: #e6f1fb;
+  --green-bg: #eaf3de; --green-text: #3b6d11;
+  --amber-bg: #faeeda; --amber-text: #854f0b;
+  --red-bg: #fcebeb; --red-text: #a32d2d;
+  --radius: 12px; --radius-sm: 8px;
+  --shadow: 0 1px 6px rgba(24,95,165,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1824; --surface: #132033; --surface2: #1a2d42;
+    --border: rgba(133,183,235,0.12); --border2: rgba(133,183,235,0.25);
+    --text: #e8f1fb; --text2: #85a8c8; --text3: #4a6a8a;
+    --accent: #378ADD; --accent2: #0c2340;
+    --green-bg: #173404; --green-text: #c0dd97;
+    --amber-bg: #412402; --amber-text: #fac775;
+    --red-bg: #501313; --red-text: #f09595;
+  }
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 10; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.stripe { width: 3px; height: 22px; background: var(--accent); border-radius: 2px; }
+.header-title { font-size: 16px; font-weight: 500; }
+.header-badge { font-size: 11px; background: var(--red-bg); color: var(--red-text); padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+.content { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.card-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.card-sub { font-size: 12px; color: var(--text2); margin-bottom: 16px; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+@media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+.stat { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px; box-shadow: var(--shadow); }
+.stat-val { font-size: 28px; font-weight: 600; color: var(--accent); }
+.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 2px; }
+btn, button { cursor: pointer; font-family: inherit; }
+.btn-primary { background: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary { background: var(--surface); color: var(--text); border: 0.5px solid var(--border2); padding: 8px 14px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; }
+.btn-danger { background: var(--red-bg); color: var(--red-text); border: none; padding: 6px 12px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; }
+input, select { width: 100%; padding: 10px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 14px; font-family: inherit; outline: none; }
+input:focus, select:focus { border-color: var(--accent); }
+label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+.table { width: 100%; border-collapse: collapse; }
+.table th { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; border-bottom: 0.5px solid var(--border); text-align: left; }
+.table td { padding: 12px; border-bottom: 0.5px solid var(--border); font-size: 13px; vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--surface2); }
+.badge { display: inline-flex; align-items: center; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
+.badge-green { background: var(--green-bg); color: var(--green-text); }
+.badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+.badge-red { background: var(--red-bg); color: var(--red-text); }
+.badge-blue { background: var(--accent2); color: var(--accent); }
+.code-chip { font-family: monospace; font-size: 13px; background: var(--surface2); padding: 4px 10px; border-radius: 6px; border: 0.5px solid var(--border); cursor: pointer; user-select: all; }
+.code-chip:hover { background: var(--accent2); }
+.divider { height: 0.5px; background: var(--border); margin: 20px 0; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-title { font-size: 15px; font-weight: 500; }
+.empty { text-align: center; padding: 32px; color: var(--text2); font-size: 14px; }
+.spinner { width: 20px; height: 20px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+/* AUTH SCREEN */
+#authScreen { display: flex; position: fixed; inset: 0; background: var(--bg); z-index: 999; align-items: center; justify-content: center; padding: 20px; }
+.auth-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 32px; width: 100%; max-width: 360px; box-shadow: var(--shadow); text-align: center; }
+.auth-icon { font-size: 40px; margin-bottom: 12px; }
+.auth-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.auth-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+.auth-err { font-size: 13px; color: var(--red-text); margin-bottom: 12px; display: none; }
+
+/* MODAL */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+.modal.open { display: flex; }
+.modal-box { background: var(--surface); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 480px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-title { font-size: 16px; font-weight: 500; }
+.modal-close { background: none; border: none; font-size: 20px; color: var(--text2); cursor: pointer; }
+.generated-code { background: var(--accent2); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 16px; text-align: center; margin: 16px 0; }
+.generated-code .code { font-family: monospace; font-size: 22px; font-weight: 600; color: var(--accent); letter-spacing: 2px; }
+.generated-code .copy-hint { font-size: 11px; color: var(--text2); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-icon">🔐</div>
+    <div class="auth-title">Admin Panel</div>
+    <div class="auth-sub">Note Visite Pro — Accesso riservato</div>
+    <div id="authErr" class="auth-err"></div>
+    <input type="email" id="authEmail" placeholder="Email admin" style="margin-bottom:12px;">
+    <input type="password" id="authPass" placeholder="Password" style="margin-bottom:16px;">
+    <button class="btn-primary" style="width:100%;" onclick="doAdminLogin()">Accedi</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+  <header>
+    <div class="header-left">
+      <div class="stripe"></div>
+      <div>
+        <div class="header-title">Note Visite Pro</div>
+      </div>
+      <span class="header-badge">ADMIN</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span id="adminEmail" style="font-size:12px;color:var(--text2);"></span>
+      <button class="btn-secondary" onclick="doLogout()">Esci</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-val" id="statUtenti">-</div><div class="stat-lbl">Utenti registrati</div></div>
+      <div class="stat"><div class="stat-val" id="statLicenze">-</div><div class="stat-lbl">Licenze attive</div></div>
+      <div class="stat"><div class="stat-val" id="statScadenza" style="color:var(--amber-text);">-</div><div class="stat-lbl">In scadenza (7gg)</div></div>
+      <div class="stat"><div class="stat-val" id="statScadute" style="color:var(--red-text);">-</div><div class="stat-lbl">Scadute</div></div>
+    </div>
+
+    <!-- GENERA LICENZA -->
+    <div class="card">
+      <div class="card-title">Genera nuova licenza</div>
+      <div class="card-sub">Crea un codice di accesso per un nuovo utente</div>
+      <div class="form-row">
+        <div>
+          <label>Nome utente</label>
+          <input type="text" id="newNome" placeholder="es. Mario Rossi">
+        </div>
+        <div>
+          <label>Email (opzionale)</label>
+          <input type="email" id="newEmail" placeholder="mario@email.com">
+        </div>
+        <div>
+          <label>Durata</label>
+          <select id="newDurata">
+            <option value="30">30 giorni</option>
+            <option value="60" selected>60 giorni (trial)</option>
+            <option value="90">90 giorni</option>
+            <option value="180">6 mesi</option>
+            <option value="365">1 anno</option>
+            <option value="9999">Illimitata (admin)</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn-primary" onclick="generaLicenza()">Genera</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LICENZE -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Licenze</div>
+        <button class="btn-secondary" onclick="loadLicenze()">↻ Aggiorna</button>
+      </div>
+      <div id="licenzeTable"><div class="empty"><span class="spinner"></span></div></div>
+    </div>
+
+    <!-- UTENTI -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Utenti registrati</div>
+        <button class="btn-secondary" onclick="loadUtenti()">↻ Aggiorna</button>
+      </div>
+      <div id="utentiTable"><div class="empty"><span class="spinner"></span></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CODICE GENERATO -->
+<div class="modal" id="codeModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Licenza generata ✓</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:8px;">Codice per <strong id="modalNome"></strong></p>
+    <div class="generated-code">
+      <div class="code" id="modalCode"></div>
+      <div class="copy-hint">Clicca per copiare</div>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Scadenza: <strong id="modalScadenza"></strong></p>
+    <button class="btn-primary" style="width:100%;" onclick="copiaEChiudi()">📋 Copia codice e chiudi</button>
+    <div style="margin-top:10px;">
+      <button class="btn-secondary" style="width:100%;" onclick="whatsappCode()">📱 Manda su WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const ADMIN_EMAIL = 'inserisci@tuaemail.com'; // <-- metti la tua email
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDiba7At5J3U5yqxvkBioA4bNu-Azww1_A",
+  authDomain: "note-visite-pro.firebaseapp.com",
+  projectId: "note-visite-pro",
+  storageBucket: "note-visite-pro.firebasestorage.app",
+  messagingSenderId: "792396809918",
+  appId: "1:792396809918:web:5110ec512ec158856340ef"
+};
+
+// ── FIREBASE INIT ───────────────────────────────────────
+var auth, db;
+window.addEventListener('load', function() {
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  auth.onAuthStateChanged(function(user) {
+    if (user && user.email === ADMIN_EMAIL) {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('adminEmail').textContent = user.email;
+      loadAll();
+    } else if (user) {
+      auth.signOut();
+      showAuthErr('Accesso non autorizzato per questo account.');
+    } else {
+      document.getElementById('authScreen').style.display = 'flex';
+      document.getElementById('mainApp').style.display = 'none';
+    }
+  });
+});
+
+function doAdminLogin() {
+  var email = document.getElementById('authEmail').value.trim();
+  var pass = document.getElementById('authPass').value;
+  if (!email || !pass) { showAuthErr('Inserisci email e password'); return; }
+  auth.signInWithEmailAndPassword(email, pass)
+    .catch(function(e) {
+      var msgs = {
+        'auth/wrong-password': 'Password errata',
+        'auth/user-not-found': 'Account non trovato',
+        'auth/invalid-credential': 'Credenziali non valide'
+      };
+      showAuthErr(msgs[e.code] || 'Errore di accesso');
+    });
+}
+
+function doLogout() {
+  auth.signOut();
+}
+
+function showAuthErr(msg) {
+  var el = document.getElementById('authErr');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ── DATA ────────────────────────────────────────────────
+function loadAll() {
+  loadLicenze();
+  loadUtenti();
+}
+
+async function loadLicenze() {
+  document.getElementById('licenzeTable').innerHTML = '<div class="empty"><span class="spinner"></span></div>';
+  try {
+    var snap = await db.collection('licenze').orderBy('createdAt', 'desc').get();
+    var licenze = [];
+    snap.forEach(function(d) { licenze.push({id: d.id, ...d.data()}); });
+    renderLicenze(licenze);
+    updateStats(licenze);
+  } catch(e) {
+    document.getElementById('licenzeTable').innerHTML = '<div class="empty">Errore caricamento: ' + e.message + '</div>';
+  }
+}
+
+async function loadUtenti() {
+  document.getElementById('utentiTable').innerHTML = '<div class="empty"><span class="spinner"></span></div>';
+  try {
+    var snap = await db.collection('users').orderBy('createdAt', 'desc').get();
+    var utenti = [];
+    snap.forEach(function(d) { utenti.push({id: d.id, ...d.data()}); });
+    renderUtenti(utenti);
+    document.getElementById('statUtenti').textContent = utenti.length;
+  } catch(e) {
+    document.getElementById('utentiTable').innerHTML = '<div class="empty">Errore: ' + e.message + '</div>';
+  }
+}
+
+function updateStats(licenze) {
+  var oggi = new Date(); oggi.setHours(0,0,0,0);
+  var tra7 = new Date(oggi); tra7.setDate(oggi.getDate() + 7);
+  var attive = licenze.filter(l => l.attiva && new Date(l.scadenza) >= oggi).length;
+  var scadenzaProssima = licenze.filter(l => l.attiva && new Date(l.scadenza) >= oggi && new Date(l.scadenza) <= tra7).length;
+  var scadute = licenze.filter(l => new Date(l.scadenza) < oggi).length;
+  document.getElementById('statLicenze').textContent = attive;
+  document.getElementById('statScadenza').textContent = scadenzaProssima;
+  document.getElementById('statScadute').textContent = scadute;
+}
+
+function renderLicenze(licenze) {
+  if (!licenze.length) {
+    document.getElementById('licenzeTable').innerHTML = '<div class="empty">Nessuna licenza ancora</div>';
+    return;
+  }
+  var oggi = new Date(); oggi.setHours(0,0,0,0);
+  var rows = licenze.map(function(l) {
+    var scad = new Date(l.scadenza);
+    var diff = Math.ceil((scad - oggi) / 86400000);
+    var stato, badge;
+    if (!l.attiva) { stato = 'Revocata'; badge = 'badge-red'; }
+    else if (diff < 0) { stato = 'Scaduta'; badge = 'badge-red'; }
+    else if (diff <= 7) { stato = 'Scade tra ' + diff + 'gg'; badge = 'badge-amber'; }
+    else { stato = 'Attiva'; badge = 'badge-green'; }
+
+    var scadStr = scad.toLocaleDateString('it-IT', {day:'2-digit',month:'short',year:'numeric'});
+    var creatStr = l.createdAt ? new Date(l.createdAt).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) : '-';
+
+    return '<tr>' +
+      '<td><span class="code-chip" onclick="copiaCode(\'' + l.codice + '\')" title="Clicca per copiare">' + l.codice + '</span></td>' +
+      '<td>' + (l.utente || '-') + '</td>' +
+      '<td style="color:var(--text2);font-size:12px;">' + (l.email || '-') + '</td>' +
+      '<td>' + scadStr + '</td>' +
+      '<td>' + creatStr + '</td>' +
+      '<td><span class="badge ' + badge + '">' + stato + '</span></td>' +
+      '<td style="display:flex;gap:6px;">' +
+        (l.attiva ? '<button class="btn-danger" onclick="revocaLicenza(\'' + l.id + '\')">Revoca</button>' : '') +
+        '<button class="btn-secondary" style="font-size:11px;padding:4px 8px;" onclick="copiaCode(\'' + l.codice + '\')">📋</button>' +
+        '<button class="btn-secondary" style="font-size:11px;padding:4px 8px;" onclick="whatsappDirect(\'' + l.codice + '\',\'' + (l.utente||'') + '\',\'' + scadStr + '\')">📱</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('licenzeTable').innerHTML =
+    '<div style="overflow-x:auto;">' +
+    '<table class="table">' +
+    '<thead><tr><th>Codice</th><th>Utente</th><th>Email</th><th>Scadenza</th><th>Creata</th><th>Stato</th><th>Azioni</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody>' +
+    '</table></div>';
+}
+
+function renderUtenti(utenti) {
+  if (!utenti.length) {
+    document.getElementById('utentiTable').innerHTML = '<div class="empty">Nessun utente registrato</div>';
+    return;
+  }
+  var rows = utenti.map(function(u) {
+    var creatStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) : '-';
+    var planBadge = u.plan === 'admin' ? 'badge-blue' : u.plan === 'premium' ? 'badge-green' : 'badge-amber';
+    return '<tr>' +
+      '<td>' + (u.nome || '-') + '</td>' +
+      '<td style="color:var(--text2);">' + (u.email || u.id) + '</td>' +
+      '<td>' + creatStr + '</td>' +
+      '<td><span class="badge ' + planBadge + '">' + (u.plan || 'trial') + '</span></td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('utentiTable').innerHTML =
+    '<div style="overflow-x:auto;">' +
+    '<table class="table">' +
+    '<thead><tr><th>Nome</th><th>Email</th><th>Registrato</th><th>Piano</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody>' +
+    '</table></div>';
+}
+
+// ── GENERA LICENZA ───────────────────────────────────────
+function generaLicenza() {
+  var nome = document.getElementById('newNome').value.trim();
+  var email = document.getElementById('newEmail').value.trim();
+  var giorni = parseInt(document.getElementById('newDurata').value);
+
+  if (!nome) { showToast('Inserisci il nome utente'); return; }
+
+  // Genera codice univoco
+  var nomeClean = nome.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8);
+  var random = Math.random().toString(36).substring(2,6).toUpperCase();
+  var codice = 'NVP-' + nomeClean + '-' + random;
+
+  var oggi = new Date();
+  var scadenza = new Date(oggi);
+  if (giorni === 9999) {
+    scadenza = new Date('2099-12-31');
+  } else {
+    scadenza.setDate(oggi.getDate() + giorni);
+  }
+  var scadenzaStr = scadenza.toISOString().split('T')[0];
+  var scadenzaLabel = scadenza.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+
+  // Salva su Firestore
+  db.collection('licenze').doc(codice).set({
+    codice: codice,
+    utente: nome,
+    email: email || null,
+    scadenza: scadenzaStr,
+    giorni: giorni,
+    attiva: true,
+    createdAt: new Date().toISOString(),
+    createdBy: auth.currentUser ? auth.currentUser.email : 'admin'
+  }).then(function() {
+    showToast('Licenza creata ✓');
+    document.getElementById('newNome').value = '';
+    document.getElementById('newEmail').value = '';
+    loadLicenze();
+    // Show modal
+    document.getElementById('modalNome').textContent = nome;
+    document.getElementById('modalCode').textContent = codice;
+    document.getElementById('modalScadenza').textContent = scadenzaLabel;
+    document.getElementById('codeModal').classList.add('open');
+  }).catch(function(e) {
+    showToast('Errore: ' + e.message);
+  });
+}
+
+async function revocaLicenza(id) {
+  if (!confirm('Vuoi revocare questa licenza?')) return;
+  try {
+    await db.collection('licenze').doc(id).update({ attiva: false });
+    showToast('Licenza revocata');
+    loadLicenze();
+  } catch(e) {
+    showToast('Errore: ' + e.message);
+  }
+}
+
+// ── MODAL ────────────────────────────────────────────────
+function closeModal() {
+  document.getElementById('codeModal').classList.remove('open');
+}
+
+function copiaEChiudi() {
+  var code = document.getElementById('modalCode').textContent;
+  copiaCode(code);
+  closeModal();
+}
+
+function copiaCode(code) {
+  navigator.clipboard.writeText(code).then(function() {
+    showToast('Codice copiato: ' + code);
+  }).catch(function() {
+    showToast(code);
+  });
+}
+
+function whatsappCode() {
+  var code = document.getElementById('modalCode').textContent;
+  var nome = document.getElementById('modalNome').textContent;
+  var scad = document.getElementById('modalScadenza').textContent;
+  whatsappDirect(code, nome, scad);
+  closeModal();
+}
+
+function whatsappDirect(code, nome, scad) {
+  var msg = 'Ciao ' + nome + '! 👋\n\nEcco il tuo codice di accesso per *Note Visite Pro*:\n\n🔑 *' + code + '*\n\nValido fino al: ' + scad + '\n\nCome attivarlo:\n1. Apri l\'app\n2. Vai su Menu → Impostazioni\n3. Inserisci il codice nel campo "Codice licenza"\n4. Clicca "Attiva licenza"\n\nBuon lavoro! 🎙️';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ── UTILS ────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+</script>
+</body>
+</html>
