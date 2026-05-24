@@ -73,7 +73,7 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
 @keyframes spin { to { transform: rotate(360deg); } }
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
 .toast.show { opacity: 1; }
-
+ 
 /* AUTH SCREEN */
 #authScreen { display: flex; position: fixed; inset: 0; background: var(--bg); z-index: 999; align-items: center; justify-content: center; padding: 20px; }
 .auth-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 32px; width: 100%; max-width: 360px; box-shadow: var(--shadow); text-align: center; }
@@ -81,7 +81,7 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
 .auth-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
 .auth-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
 .auth-err { font-size: 13px; color: var(--red-text); margin-bottom: 12px; display: none; }
-
+ 
 /* MODAL */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
 .modal.open { display: flex; }
@@ -98,7 +98,7 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
+ 
 <!-- AUTH SCREEN -->
 <div id="authScreen">
   <div class="auth-card">
@@ -111,7 +111,7 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
     <button class="btn-primary" style="width:100%;" onclick="doAdminLogin()">Accedi</button>
   </div>
 </div>
-
+ 
 <!-- MAIN APP -->
 <div id="mainApp" style="display:none;">
   <header>
@@ -127,9 +127,9 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
       <button class="btn-secondary" onclick="doLogout()">Esci</button>
     </div>
   </header>
-
+ 
   <div class="content">
-
+ 
     <!-- STATS -->
     <div class="stats-grid">
       <div class="stat"><div class="stat-val" id="statUtenti">-</div><div class="stat-lbl">Utenti registrati</div></div>
@@ -137,7 +137,7 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
       <div class="stat"><div class="stat-val" id="statScadenza" style="color:var(--amber-text);">-</div><div class="stat-lbl">In scadenza (7gg)</div></div>
       <div class="stat"><div class="stat-val" id="statScadute" style="color:var(--red-text);">-</div><div class="stat-lbl">Scadute</div></div>
     </div>
-
+ 
     <!-- GENERA LICENZA -->
     <div class="card">
       <div class="card-title">Genera nuova licenza</div>
@@ -167,7 +167,7 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
         </div>
       </div>
     </div>
-
+ 
     <!-- LICENZE -->
     <div class="card">
       <div class="section-header">
@@ -176,7 +176,7 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
       </div>
       <div id="licenzeTable"><div class="empty"><span class="spinner"></span></div></div>
     </div>
-
+ 
     <!-- UTENTI -->
     <div class="card">
       <div class="section-header">
@@ -185,10 +185,10 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
       </div>
       <div id="utentiTable"><div class="empty"><span class="spinner"></span></div></div>
     </div>
-
+ 
   </div>
 </div>
-
+ 
 <!-- MODAL CODICE GENERATO -->
 <div class="modal" id="codeModal">
   <div class="modal-box">
@@ -208,12 +208,12 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
     </div>
   </div>
 </div>
-
+ 
 <div class="toast" id="toast"></div>
-
+ 
 <script>
 // ── CONFIG ──────────────────────────────────────────────
-const ADMIN_EMAIL = 'inserisci@tuaemail.com'; // <-- metti la tua email
+const ADMIN_EMAIL = 'giof3000@gmail.com'; // <-- metti la tua email
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDiba7At5J3U5yqxvkBioA4bNu-Azww1_A",
   authDomain: "note-visite-pro.firebaseapp.com",
@@ -222,7 +222,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "792396809918",
   appId: "1:792396809918:web:5110ec512ec158856340ef"
 };
-
+ 
 // ── FIREBASE INIT ───────────────────────────────────────
 var auth, db;
 function initFirebase() {
@@ -249,7 +249,7 @@ function initFirebase() {
   });
 }
 window.addEventListener('load', initFirebase);
-
+ 
 function doAdminLogin() {
   var email = document.getElementById('authEmail').value.trim();
   var pass = document.getElementById('authPass').value;
@@ -264,23 +264,23 @@ function doAdminLogin() {
       showAuthErr(msgs[e.code] || 'Errore di accesso');
     });
 }
-
+ 
 function doLogout() {
   auth.signOut();
 }
-
+ 
 function showAuthErr(msg) {
   var el = document.getElementById('authErr');
   el.textContent = msg;
   el.style.display = 'block';
 }
-
+ 
 // ── DATA ────────────────────────────────────────────────
 function loadAll() {
   loadLicenze();
   loadUtenti();
 }
-
+ 
 async function loadLicenze() {
   document.getElementById('licenzeTable').innerHTML = '<div class="empty"><span class="spinner"></span></div>';
   try {
@@ -293,7 +293,7 @@ async function loadLicenze() {
     document.getElementById('licenzeTable').innerHTML = '<div class="empty">Errore caricamento: ' + e.message + '</div>';
   }
 }
-
+ 
 async function loadUtenti() {
   document.getElementById('utentiTable').innerHTML = '<div class="empty"><span class="spinner"></span></div>';
   try {
@@ -306,7 +306,7 @@ async function loadUtenti() {
     document.getElementById('utentiTable').innerHTML = '<div class="empty">Errore: ' + e.message + '</div>';
   }
 }
-
+ 
 function updateStats(licenze) {
   var oggi = new Date(); oggi.setHours(0,0,0,0);
   var tra7 = new Date(oggi); tra7.setDate(oggi.getDate() + 7);
@@ -317,7 +317,7 @@ function updateStats(licenze) {
   document.getElementById('statScadenza').textContent = scadenzaProssima;
   document.getElementById('statScadute').textContent = scadute;
 }
-
+ 
 function renderLicenze(licenze) {
   if (!licenze.length) {
     document.getElementById('licenzeTable').innerHTML = '<div class="empty">Nessuna licenza ancora</div>';
@@ -332,10 +332,10 @@ function renderLicenze(licenze) {
     else if (diff < 0) { stato = 'Scaduta'; badge = 'badge-red'; }
     else if (diff <= 7) { stato = 'Scade tra ' + diff + 'gg'; badge = 'badge-amber'; }
     else { stato = 'Attiva'; badge = 'badge-green'; }
-
+ 
     var scadStr = scad.toLocaleDateString('it-IT', {day:'2-digit',month:'short',year:'numeric'});
     var creatStr = l.createdAt ? new Date(l.createdAt).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) : '-';
-
+ 
     return '<tr>' +
       '<td><span class="code-chip" onclick="copiaCode(\'' + l.codice + '\')" title="Clicca per copiare">' + l.codice + '</span></td>' +
       '<td>' + (l.utente || '-') + '</td>' +
@@ -350,7 +350,7 @@ function renderLicenze(licenze) {
       '</td>' +
     '</tr>';
   }).join('');
-
+ 
   document.getElementById('licenzeTable').innerHTML =
     '<div style="overflow-x:auto;">' +
     '<table class="table">' +
@@ -358,7 +358,7 @@ function renderLicenze(licenze) {
     '<tbody>' + rows + '</tbody>' +
     '</table></div>';
 }
-
+ 
 function renderUtenti(utenti) {
   if (!utenti.length) {
     document.getElementById('utentiTable').innerHTML = '<div class="empty">Nessun utente registrato</div>';
@@ -374,7 +374,7 @@ function renderUtenti(utenti) {
       '<td><span class="badge ' + planBadge + '">' + (u.plan || 'trial') + '</span></td>' +
     '</tr>';
   }).join('');
-
+ 
   document.getElementById('utentiTable').innerHTML =
     '<div style="overflow-x:auto;">' +
     '<table class="table">' +
@@ -382,20 +382,20 @@ function renderUtenti(utenti) {
     '<tbody>' + rows + '</tbody>' +
     '</table></div>';
 }
-
+ 
 // ── GENERA LICENZA ───────────────────────────────────────
 function generaLicenza() {
   var nome = document.getElementById('newNome').value.trim();
   var email = document.getElementById('newEmail').value.trim();
   var giorni = parseInt(document.getElementById('newDurata').value);
-
+ 
   if (!nome) { showToast('Inserisci il nome utente'); return; }
-
+ 
   // Genera codice univoco
   var nomeClean = nome.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8);
   var random = Math.random().toString(36).substring(2,6).toUpperCase();
   var codice = 'NVP-' + nomeClean + '-' + random;
-
+ 
   var oggi = new Date();
   var scadenza = new Date(oggi);
   if (giorni === 9999) {
@@ -405,7 +405,7 @@ function generaLicenza() {
   }
   var scadenzaStr = scadenza.toISOString().split('T')[0];
   var scadenzaLabel = scadenza.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
-
+ 
   // Salva su Firestore
   db.collection('licenze').doc(codice).set({
     codice: codice,
@@ -430,7 +430,7 @@ function generaLicenza() {
     showToast('Errore: ' + e.message);
   });
 }
-
+ 
 async function revocaLicenza(id) {
   if (!confirm('Vuoi revocare questa licenza?')) return;
   try {
@@ -441,18 +441,18 @@ async function revocaLicenza(id) {
     showToast('Errore: ' + e.message);
   }
 }
-
+ 
 // ── MODAL ────────────────────────────────────────────────
 function closeModal() {
   document.getElementById('codeModal').classList.remove('open');
 }
-
+ 
 function copiaEChiudi() {
   var code = document.getElementById('modalCode').textContent;
   copiaCode(code);
   closeModal();
 }
-
+ 
 function copiaCode(code) {
   navigator.clipboard.writeText(code).then(function() {
     showToast('Codice copiato: ' + code);
@@ -460,7 +460,7 @@ function copiaCode(code) {
     showToast(code);
   });
 }
-
+ 
 function whatsappCode() {
   var code = document.getElementById('modalCode').textContent;
   var nome = document.getElementById('modalNome').textContent;
@@ -468,12 +468,12 @@ function whatsappCode() {
   whatsappDirect(code, nome, scad);
   closeModal();
 }
-
+ 
 function whatsappDirect(code, nome, scad) {
   var msg = 'Ciao ' + nome + '! 👋\n\nEcco il tuo codice di accesso per *Note Visite Pro*:\n\n🔑 *' + code + '*\n\nValido fino al: ' + scad + '\n\nCome attivarlo:\n1. Apri l\'app\n2. Vai su Menu → Impostazioni\n3. Inserisci il codice nel campo "Codice licenza"\n4. Clicca "Attiva licenza"\n\nBuon lavoro! 🎙️';
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
-
+ 
 // ── UTILS ────────────────────────────────────────────────
 function showToast(msg) {
   var t = document.getElementById('toast');
