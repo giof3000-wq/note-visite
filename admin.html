@@ -93,6 +93,9 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
 .generated-code .code { font-family: monospace; font-size: 22px; font-weight: 600; color: var(--accent); letter-spacing: 2px; }
 .generated-code .copy-hint { font-size: 11px; color: var(--text2); margin-top: 6px; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -208,11 +211,6 @@ label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); 
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
 // ── CONFIG ──────────────────────────────────────────────
 const ADMIN_EMAIL = 'inserisci@tuaemail.com'; // <-- metti la tua email
@@ -227,7 +225,11 @@ const FIREBASE_CONFIG = {
 
 // ── FIREBASE INIT ───────────────────────────────────────
 var auth, db;
-window.addEventListener('load', function() {
+function initFirebase() {
+  if (typeof firebase === 'undefined') {
+    setTimeout(initFirebase, 100);
+    return;
+  }
   if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
   auth = firebase.auth();
   db = firebase.firestore();
@@ -245,7 +247,8 @@ window.addEventListener('load', function() {
       document.getElementById('mainApp').style.display = 'none';
     }
   });
-});
+}
+window.addEventListener('load', initFirebase);
 
 function doAdminLogin() {
   var email = document.getElementById('authEmail').value.trim();
